@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Allow: /agent
+Allow: /app
+Allow: /demo
+
+Sitemap: https://optionsworld.trade/sitemap.xml
