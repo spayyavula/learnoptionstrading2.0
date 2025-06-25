@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Save, RefreshCw, Download, Upload, AlertTriangle, Database, Activity, Tag, Plus, Trash2 } from 'lucide-react'
+import { Save, RefreshCw, Download, Upload, AlertTriangle, Database, Activity, Tag, Plus, Trash2, CreditCard } from 'lucide-react'
 import { useTradingContext } from '../context/TradingContext'
 import { CouponService } from '../services/couponService'
 import { StripeService } from '../services/stripeService'

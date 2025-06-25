@@ -63,10 +63,10 @@ export function getSavingsAmount(originalPrice: number, discountedPrice: number)
 
 /**
  * Get plan details including pricing information
- * @param planId - The plan ID ('monthly', 'yearly', or 'enterprise')
+ * @param planId - The plan ID ('monthly', 'yearly', 'enterprise', or 'basic')
  * @returns Plan details object
  */
-export function getPlanDetails(planId: 'monthly' | 'yearly' | 'enterprise') {
+export function getPlanDetails(planId: 'monthly' | 'yearly' | 'enterprise' | 'basic') {
   let basePrice;
   
   if (planId === 'basic' || planId === 'monthly') {

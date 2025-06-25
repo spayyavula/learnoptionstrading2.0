@@ -131,22 +131,20 @@ export class StripeService {
    * Create checkout session with coupon support
    */
   static async createCheckoutSession(
-    plan: 'monthly' | 'yearly',
+    plan: 'monthly' | 'yearly' | 'basic' | 'pro' | 'enterprise',
     couponCode?: string,
     customerEmail?: string,
     metadata?: Record<string, string>
   ): Promise<{ url: string }> {
-    const { PRICE_ID_BASIC, PRICE_ID_PRO, PRICE_ID_ENTERPRISE } = this.getEnvVars()
+    const { MONTHLY_PRICE_ID, YEARLY_PRICE_ID } = this.getEnvVars()
     
     try {
       let priceId;
       
-      if (plan === 'monthly' || plan === 'basic') {
-        priceId = PRICE_ID_BASIC;
-      } else if (plan === 'pro') {
-        priceId = PRICE_ID_PRO;
+      if (plan === 'monthly' || plan === 'basic' || plan === 'pro') {
+        priceId = MONTHLY_PRICE_ID;
       } else if (plan === 'yearly' || plan === 'enterprise') {
-        priceId = PRICE_ID_ENTERPRISE;
+        priceId = YEARLY_PRICE_ID;
       }
       
       if (!priceId) {
