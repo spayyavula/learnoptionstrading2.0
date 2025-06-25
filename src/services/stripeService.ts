@@ -316,7 +316,11 @@ export class StripeService {
     if (couponCode) {
       // Import coupon service for validation
       import('../services/couponService').then(({ CouponService }) => {
-        const validation = CouponService.validateCoupon(couponCode, plan, displayPrice, true)
+        // Map plan types to subscription intervals for coupon validation
+        const subscriptionInterval: 'monthly' | 'yearly' = 
+          (plan === 'yearly' || plan === 'enterprise') ? 'yearly' : 'monthly'
+        
+        const validation = CouponService.validateCoupon(couponCode, subscriptionInterval, displayPrice, true)
         if (validation.isValid) {
           finalPrice = validation.finalAmount
           discountInfo = `\nCoupon Applied: ${couponCode}\nDiscount: $${validation.discountAmount.toFixed(2)}`
