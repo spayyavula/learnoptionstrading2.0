@@ -13,11 +13,14 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ className = '' 
   if (subscription.active) {
     return (
       <div className={`bg-green-50 border border-green-200 rounded-lg p-3 ${className}`}>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap">
           <div className="flex items-center">
             <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
             <div>
-              <span className="font-medium text-green-800">
+              <span className="text-sm font-medium text-green-800">
+                {subscription.plan === 'pro' ? 'Pro' : 
+                 subscription.plan === 'enterprise' || subscription.plan === 'yearly' ? 'Enterprise' : 'Basic'} Plan
+              </span>
                 {subscription.plan === 'yearly' ? 'Enterprise' : 
                  subscription.plan === 'pro' ? 'Pro' : 'Basic'} Plan Active
               </span>

@@ -133,12 +133,21 @@ export class StripeService {
   static async createCheckoutSession(
     plan: 'monthly' | 'yearly',
     couponCode?: string,
-    customerEmail?: string
+    customerEmail?: string,
+    metadata?: Record<string, string>
   ): Promise<{ url: string }> {
-    const { MONTHLY_PRICE_ID, YEARLY_PRICE_ID } = this.getEnvVars()
+    const { PRICE_ID_BASIC, PRICE_ID_PRO, PRICE_ID_ENTERPRISE } = this.getEnvVars()
     
     try {
-      const priceId = plan === 'monthly' ? MONTHLY_PRICE_ID : YEARLY_PRICE_ID
+      let priceId;
+      
+      if (plan === 'monthly' || plan === 'basic') {
+        priceId = PRICE_ID_BASIC;
+      } else if (plan === 'pro') {
+        priceId = PRICE_ID_PRO;
+      } else if (plan === 'yearly' || plan === 'enterprise') {
+        priceId = PRICE_ID_ENTERPRISE;
+      }
       
       if (!priceId) {
         throw new Error(`${plan} price ID not configured`)
@@ -268,7 +277,7 @@ export class StripeService {
       {
         id: 'basic',
         name: 'Basic',
-        description: 'Basic options trading with limited features',
+        description: 'Basic options trading with 5 top liquid contracts',
         price: BASE_PRICES.monthly,
         currency: 'USD',
         interval: 'month',
@@ -277,7 +286,7 @@ export class StripeService {
       {
         id: 'pro',
         name: 'Pro',
-        description: 'Full access with advanced analytics and strategy backtesting',
+        description: 'Full access with advanced analytics and strategy testing',
         price: BASE_PRICES.pro,
         currency: 'USD',
         interval: 'month',
@@ -286,7 +295,7 @@ export class StripeService {
       {
         id: 'enterprise',
         name: 'Enterprise',
-        description: 'Everything in Pro plus team collaboration and API access',
+        description: 'Everything in Pro plus team features and API access',
         price: BASE_PRICES.enterprise,
         currency: 'USD',
         interval: 'month',

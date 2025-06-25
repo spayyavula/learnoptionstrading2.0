@@ -8,8 +8,8 @@
 // Base prices for all subscription plans
 export const BASE_PRICES = {
   monthly: 29,
-  yearly: 290,
-  enterprise: 25, 
+  yearly: 290, 
+  enterprise: 25,
   pro: 75
 };
 
@@ -69,14 +69,14 @@ export function getSavingsAmount(originalPrice: number, discountedPrice: number)
 export function getPlanDetails(planId: 'monthly' | 'yearly' | 'enterprise') {
   let basePrice;
   
-  if (planId === 'monthly') {
+  if (planId === 'basic' || planId === 'monthly') {
     basePrice = BASE_PRICES.monthly;
-  } else if (planId === 'yearly') {
+  } else if (planId === 'enterprise' || planId === 'yearly') {
     basePrice = BASE_PRICES.enterprise; // Enterprise is $25/month
-  } else if (planId === 'enterprise') {
-    basePrice = BASE_PRICES.enterprise;
-  } else {
+  } else if (planId === 'pro') {
     basePrice = BASE_PRICES.pro; // Pro is $75/month
+  } else {
+    basePrice = BASE_PRICES.monthly; // Default to monthly/basic
   }
   
   return {

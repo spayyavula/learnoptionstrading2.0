@@ -123,6 +123,10 @@ export default function SubscriptionStatus({ className = '' }: SubscriptionStatu
   const nextBilling = subscription.subscription?.current_period_end 
     ? new Date(subscription.subscription.current_period_end).toLocaleDateString()
     : 'Unknown'
+  
+  // Determine the plan name based on the subscription plan
+  const displayPlan = subscription.plan === 'pro' ? 'Pro' : 
+                      subscription.plan === 'enterprise' || subscription.plan === 'yearly' ? 'Enterprise' : 'Basic';
 
   return (
     <div className={`p-3 bg-green-50 border border-green-200 rounded-lg ${className}`}>

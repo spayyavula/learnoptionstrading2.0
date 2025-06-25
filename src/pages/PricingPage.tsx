@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Shield, AlertTriangle } from 'lucide-react';
 import PricingCard from '../components/PricingCard';
+import { BASE_PRICES } from '../utils/priceSync';
 
 const PricingPage: React.FC = () => {
   return (
@@ -24,7 +25,7 @@ const PricingPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <PricingCard
             title="Basic"
-            price={29}
+            price={BASE_PRICES.monthly}
             interval="month"
             description="Perfect for beginners"
             features={[
@@ -39,7 +40,7 @@ const PricingPage: React.FC = () => {
           
           <PricingCard
             title="Pro"
-            price={75}
+            price={BASE_PRICES.pro}
             interval="month"
             description="For serious traders"
             features={[
@@ -56,7 +57,7 @@ const PricingPage: React.FC = () => {
           
           <PricingCard
             title="Enterprise"
-            price={25}
+            price={BASE_PRICES.enterprise}
             interval="month"
             description="For organizations"
             features={[
