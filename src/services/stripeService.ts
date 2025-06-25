@@ -390,7 +390,7 @@ export class StripeService {
   /**
    * Check if user has active subscription (mock for development)
    */
-  static getSubscriptionStatus(): { active: boolean; plan?: string; subscription?: any } {
+  static getSubscriptionStatus(): { active: boolean; plan?: string; subscription?: any; termsAccepted?: boolean } {
     // Try to get real subscription status first
     try {
       const token = localStorage.getItem('supabase.auth.token')
@@ -413,14 +413,15 @@ export class StripeService {
         return {
           active: isActive,
           plan: subscription.plan,
-          subscription
+          subscription,
+          termsAccepted: subscription.terms_accepted || false
         }
       }
       
-      return { active: false }
+      return { active: false, termsAccepted: false }
     } catch (error) {
       console.error('Error checking subscription status:', error)
-      return { active: false }
+      return { active: false, termsAccepted: false }
     }
   }
   
