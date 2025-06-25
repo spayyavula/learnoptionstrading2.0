@@ -3,7 +3,8 @@ import { Link, useLocation } from 'react-router-dom'
 import { 
   BarChart3, Briefcase, TrendingUp, FileText, PieChart, 
   Settings, Users, Menu, X, BookOpen, Lightbulb, CreditCard,
-  Calculator, Bot, AlertTriangle, ChevronDown, ChevronRight
+  Calculator, Bot, AlertTriangle, ChevronDown, ChevronRight,
+  ShieldCheck, UserCircle
  } from 'lucide-react'
 import Disclaimer from './Disclaimer'
 import SubscriptionBanner from './SubscriptionBanner'
@@ -53,6 +54,8 @@ const menuCategories = [
   {
     name: 'System',
     items: [
+      { name: 'My Profile', href: '/app/profile', icon: UserCircle },
+      { name: 'Admin', href: '/app/admin', icon: ShieldCheck },
       { name: 'Subscription', href: '/pricing', icon: CreditCard },
       { name: 'Data Manager', href: '/app/data-manager', icon: Settings },
       { name: 'Agent API', href: '/agent', icon: Bot },

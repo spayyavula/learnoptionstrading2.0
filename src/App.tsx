@@ -6,6 +6,7 @@ import Disclaimer from './components/Disclaimer'
 import ErrorDisplay from './components/ErrorDisplay'
 import Layout from './components/Layout'
 import Landing from './pages/Landing'
+import AdminRoute from './components/AdminRoute'
 import { OptionsProvider } from './context/OptionsContext'
 import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
@@ -37,6 +38,8 @@ const SubscriptionPage = lazy(() => import('./pages/SubscriptionPage'))
 const PricingPage = lazy(() => import('./pages/PricingPage'))
 const SuccessPage = lazy(() => import('./pages/SuccessPage'))
 const CancelPage = lazy(() => import('./pages/CancelPage'))
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
+const UserProfile = lazy(() => import('./pages/UserProfile'))
 
 // Loading component for Suspense
 const LoadingFallback = () => (
@@ -87,7 +90,9 @@ function App() {
                         <Route path="/analytics" element={<Analytics />} />
                         <Route path="/community" element={<Community />} />
                         <Route path="/settings" element={<Settings />} />
+                        <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
                         <Route path="/data-manager" element={<OptionsDataManager />} />
+                        <Route path="/profile" element={<UserProfile />} />
                       </Routes>
                     </Layout>
                   } />
