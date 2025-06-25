@@ -61,7 +61,7 @@ const SuccessPage: React.FC = () => {
             to="/app/learning" 
             className="btn btn-secondary flex items-center justify-center"
           >
-            Start Learning
+            Begin Learning
             <BookOpen className="ml-2 h-4 w-4" />
           </Link>
         </div>

@@ -11,11 +11,11 @@ const CancelPage: React.FC = () => {
         </div>
         
         <h1 className="text-2xl font-bold text-gray-900 mb-4">
-          Subscription Cancelled
+          Enrollment Cancelled
         </h1>
         
         <p className="text-gray-600 mb-6">
-          Your subscription process was cancelled. No charges have been made to your account.
+          Your academy enrollment process was cancelled. No charges have been made to your account.
         </p>
         
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
@@ -24,7 +24,7 @@ const CancelPage: React.FC = () => {
             <div className="text-left">
               <h3 className="font-medium text-yellow-800">Need Help?</h3>
               <p className="text-sm text-yellow-700 mt-1">
-                If you encountered any issues during the subscription process or have questions about our plans, please contact our support team.
+                If you encountered any issues during the enrollment process or have questions about our learning programs, please contact our support team.
               </p>
             </div>
           </div>
@@ -43,7 +43,7 @@ const CancelPage: React.FC = () => {
             to="/pricing" 
             className="btn btn-primary flex items-center justify-center"
           >
-            View Plans
+            View Programs
           </Link>
         </div>
       </div>

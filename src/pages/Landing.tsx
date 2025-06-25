@@ -26,6 +26,7 @@ import { BASE_PRICES } from '../utils/priceSync'
 import { useState, useEffect, useRef } from 'react'
 import Disclaimer from '../components/Disclaimer'
 import { BuyMeCoffeeService } from '../services/buyMeCoffeeService'
+import { YEARLY_SAVINGS_PERCENT, formatPrice } from '../utils/priceSync'
 import { CouponService } from '../services/couponService'
 import DealsSection from '../components/DealsSection'
 import CouponInput from '../components/CouponInput'
@@ -233,7 +234,7 @@ export default function Landing() {
           )}
           <div className="text-center">
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
-              Learn to Be an Expert Trader
+              Learn Options Trading Academy
             </h1>
             <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto">
               Advanced analytics, real-time data, and AI-powered insights to develop your options trading expertise
@@ -667,7 +668,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-white font-semibold mb-4">Options World</h3>
+              <h3 className="text-white font-semibold mb-4">Learn Options Trading Academy</h3>
               <p className="text-gray-400">
                 Professional options trading platform for serious traders
               </p>
@@ -707,7 +708,7 @@ export default function Landing() {
           </div>
 
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; {new Date().getFullYear()} Options World. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} Learn Options Trading Academy. All rights reserved.</p>
             <p className="mt-2 text-sm">
               <strong>Risk Disclaimer:</strong> Options trading involves substantial risk and is not suitable for all investors. 
               You may lose all of your invested capital. Past performance is not indicative of future results.

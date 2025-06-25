@@ -59,7 +59,7 @@ const Disclaimer: React.FC<DisclaimerProps> = ({
                 <h3 className="text-lg font-medium text-gray-900">Risk Disclaimer</h3>
                 <div className="mt-2 text-sm text-gray-500 space-y-2">
                   <p className="font-medium">
-                    <strong>Options World is for educational purposes only.</strong> Our platform is designed to help you learn and develop trading skills, not to provide financial advice.
+                    <strong>Learn Options Trading Academy is for educational purposes only.</strong> Our platform is designed to help you learn and develop trading skills, not to provide financial advice.
                   </p>
                   <p>
                     Options trading involves significant risk and requires proper education. This platform uses simulated trading to help you learn without risking real money.
@@ -78,7 +78,7 @@ const Disclaimer: React.FC<DisclaimerProps> = ({
                       I Understand
                     </button>
                     <p className="text-sm text-blue-700">
-                      <strong>Learning Disclaimer:</strong> Options World is designed to help you learn trading skills. Focus on developing expertise, not on profits. Trading involves risk.
+                      <strong>Learning Disclaimer:</strong> Learn Options Trading Academy is designed to help you learn trading skills. Focus on developing expertise, not on profits. Trading involves risk.
                     </p>
                   </div>
                 )}
@@ -97,7 +97,7 @@ const Disclaimer: React.FC<DisclaimerProps> = ({
           <div className="flex items-center">
             <AlertTriangle className="h-4 w-4 text-yellow-400 mr-2" />
             <span>
-              <strong>Disclaimer:</strong> Options World is for educational purposes only. Our focus is on learning, not profits. Trading involves risk.
+              <strong>Disclaimer:</strong> Learn Options Trading Academy is for educational purposes only. Our focus is on learning, not profits. Trading involves risk.
             </span>
           </div>
           
@@ -125,7 +125,7 @@ const Disclaimer: React.FC<DisclaimerProps> = ({
             </div>
             <div className="ml-3">
               <p className="text-sm text-yellow-700">
-                <strong>Disclaimer:</strong> Options World is for educational purposes only. Not financial advice. Trading involves risk.
+                <strong>Disclaimer:</strong> Learn Options Trading Academy is for educational purposes only. Not financial advice. Trading involves risk.
               </p>
             </div>
           </div>

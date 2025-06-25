@@ -11,16 +11,24 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ className = '' 
   const subscription = StripeService.getSubscriptionStatus();
   
   if (subscription.active) {
+    // Determine the plan name based on the subscription plan
+    const displayPlan = subscription.plan === 'pro' ? 'Pro' : 
+                        subscription.plan === 'enterprise' || subscription.plan === 'yearly' ? 'Enterprise' : 'Basic';
+  
     return (
       <div className={`bg-green-50 border border-green-200 rounded-lg p-3 ${className}`}>
         <div className="flex items-center justify-between flex-wrap">
           <div className="flex items-center">
             <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
             <div>
-              <span className="text-sm font-medium text-green-800">
-                {subscription.plan === 'pro' ? 'Pro' : 
-                 subscription.plan === 'enterprise' || subscription.plan === 'yearly' ? 'Enterprise' : 'Basic'} Plan
-              </span>
+              <div className="flex items-center">
+                <span className="text-sm font-medium text-green-800">Learn {displayPlan} Plan</span>
+                {subscription.termsAccepted && (
+                  <span className="ml-2 px-1.5 py-0.5 bg-green-100 text-green-700 text-xs rounded">
+                    Terms Accepted
+                  </span>
+                )}
+              </div>
               <p className="text-xs text-green-600">
                 Your subscription is active until {new Date(subscription.subscription?.current_period_end || '').toLocaleDateString()}
               </p>
@@ -42,7 +50,7 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ className = '' 
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <XCircle className="h-5 w-5 text-yellow-600 mr-2" />
-          <span className="font-medium text-yellow-800">Free Plan</span>
+          <span className="font-medium text-yellow-800">Free Access</span>
         </div>
         <Link 
           to="/pricing" 

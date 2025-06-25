@@ -191,7 +191,7 @@ export default function Layout({ children }: LayoutProps) {
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
         <div className="flex flex-col flex-grow bg-white border-r border-gray-200 shadow-sm">
           <div className="flex h-16 items-center px-4">
-            <h1 className="text-xl font-bold text-gray-900">Paper Trading</h1>
+            <h1 className="text-xl font-bold text-gray-900">Options Academy</h1>
           </div>
           <nav className="flex-1 space-y-1 px-2 py-4">
             {menuCategories.map((category) => (
@@ -283,8 +283,8 @@ export default function Layout({ children }: LayoutProps) {
             </div>
             <div className="flex items-center gap-x-4 lg:gap-x-6">
               <div className="text-sm text-gray-500">
-                Paper Trading Mode
-              </div>
+                Learning Mode
+              </h2>
             </div>
           </div>
         </div>
@@ -298,7 +298,7 @@ export default function Layout({ children }: LayoutProps) {
             <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-2 text-sm text-blue-700 flex items-center">
               <BookOpen className="h-4 w-4 text-blue-600 mr-2 flex-shrink-0" />
               <p>
-                <strong>Learning Focus:</strong> This platform is designed to help you develop trading expertise, not to maximize profits. Focus on learning and skill development.
+                <strong>Learning Focus:</strong> This academy is designed to help you develop trading expertise, not to maximize profits. Focus on learning and skill development.
               </p>
             </div>
             

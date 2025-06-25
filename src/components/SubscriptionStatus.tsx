@@ -105,7 +105,7 @@ export default function SubscriptionStatus({ className = '' }: SubscriptionStatu
       <div className={`flex items-center justify-between p-3 bg-yellow-50 border border-yellow-200 rounded-lg ${className}`}>
         <div className="flex items-center space-x-2">
           <XCircle className="h-4 w-4 text-yellow-600" />
-          <span className="text-sm font-medium text-yellow-800">No Active Subscription</span>
+          <span className="text-sm font-medium text-yellow-800">No Active Academy Membership</span>
         </div>
         <Link
           to="/pricing"
@@ -117,9 +117,8 @@ export default function SubscriptionStatus({ className = '' }: SubscriptionStatu
     )
   }
 
-  const planName = subscription.plan === 'yearly' ? 'Pro Yearly' : 'Pro Monthly'
-  const displayPlan = subscription.plan === 'yearly' ? 'Enterprise' : 
-                      subscription.plan === 'pro' ? 'Pro' : 'Basic';
+  const displayPlan = subscription.plan === 'pro' ? 'Pro' : 
+                     subscription.plan === 'enterprise' || subscription.plan === 'yearly' ? 'Enterprise' : 'Basic';
   const nextBilling = subscription.subscription?.current_period_end 
     ? new Date(subscription.subscription.current_period_end).toLocaleDateString()
     : 'Unknown'
@@ -135,7 +134,7 @@ export default function SubscriptionStatus({ className = '' }: SubscriptionStatu
           <CheckCircle className="h-4 w-4 text-green-600" />
           <div>
             <div className="flex items-center">
-              <span className="text-sm font-medium text-green-800">{displayPlan} Plan</span>
+              <span className="text-sm font-medium text-green-800">Learn {displayPlan} Membership</span>
               {subscription.termsAccepted && (
                 <span className="ml-2 px-1.5 py-0.5 bg-green-100 text-green-700 text-xs rounded">
                   Terms Accepted

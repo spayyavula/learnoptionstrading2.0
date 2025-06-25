@@ -16,20 +16,20 @@ const PricingPage: React.FC = () => {
         </div>
         
         <div className="text-center mb-12">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Choose Your Plan</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Join Our Trading Academy</h1>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Get full access to all features and take your trading skills to the next level
+            Master options trading with our comprehensive learning platform
           </p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <PricingCard
-            title="Basic"
+            title="Learn Basic"
             price={BASE_PRICES.monthly}
             interval="month"
-            description="Perfect for beginners"
+            description="Start your learning journey"
             features={[
-              "Access to basic trading features",
+              "Access to basic learning modules",
               "Real-time market data",
               "Basic analytics",
               "Email support",
@@ -39,12 +39,12 @@ const PricingPage: React.FC = () => {
           />
           
           <PricingCard
-            title="Pro"
+            title="Learn Pro"
             price={BASE_PRICES.pro}
             interval="month"
-            description="For serious traders"
+            description="For dedicated students"
             features={[
-              "Everything in Basic",
+              "Everything in Learn Basic",
               "Advanced analytics",
               "Options trading features",
               "Priority support",
@@ -56,12 +56,12 @@ const PricingPage: React.FC = () => {
           />
           
           <PricingCard
-            title="Enterprise"
+            title="Learn Enterprise"
             price={BASE_PRICES.enterprise}
             interval="month"
-            description="For organizations"
+            description="For trading schools & teams"
             features={[
-              "Everything in Pro",
+              "Everything in Learn Pro",
               "Dedicated account manager",
               "Custom integrations",
               "Team collaboration features",
@@ -78,7 +78,7 @@ const PricingPage: React.FC = () => {
             <div>
               <h4 className="font-medium text-yellow-800">Important Information</h4>
               <p className="text-sm text-yellow-700 mt-1">
-                Options World is for educational purposes only. Our platform is designed to help you learn and develop trading skills, not to provide financial advice. Options trading involves significant risk and requires proper education.
+                Learn Options Trading Academy is for educational purposes only. Our platform is designed to help you learn and develop trading skills, not to provide financial advice. Options trading involves significant risk and requires proper education.
               </p>
             </div>
           </div>
