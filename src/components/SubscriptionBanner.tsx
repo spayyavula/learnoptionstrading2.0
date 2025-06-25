@@ -21,9 +21,6 @@ const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ className = '' 
                 {subscription.plan === 'pro' ? 'Pro' : 
                  subscription.plan === 'enterprise' || subscription.plan === 'yearly' ? 'Enterprise' : 'Basic'} Plan
               </span>
-                {subscription.plan === 'yearly' ? 'Enterprise' : 
-                 subscription.plan === 'pro' ? 'Pro' : 'Basic'} Plan Active
-              </span>
               <p className="text-xs text-green-600">
                 Your subscription is active until {new Date(subscription.subscription?.current_period_end || '').toLocaleDateString()}
               </p>

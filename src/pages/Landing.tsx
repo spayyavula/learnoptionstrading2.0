@@ -30,7 +30,6 @@ import { CouponService } from '../services/couponService'
 import DealsSection from '../components/DealsSection'
 import CouponInput from '../components/CouponInput'
 import TermsAgreement from '../components/TermsAgreement'
-import { BASE_PRICES, YEARLY_SAVINGS_PERCENT, formatPrice } from '../utils/priceSync'
 
 export default function Landing() {
   const navigate = useNavigate()
