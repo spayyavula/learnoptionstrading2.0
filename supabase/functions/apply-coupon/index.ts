@@ -31,10 +31,10 @@ serve(async (req) => {
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
     // Get request body
-    const { priceId, couponCode, customerEmail, successUrl, cancelUrl, metadata } = await req.json()
+    const { subscription_id, coupon_id } = await req.json()
 
-    if (!priceId) {
-      throw new Error("Price ID is required")
+    if (!subscription_id || !coupon_id) {
+      throw new Error("Subscription ID and Coupon ID are required")
     }
 
     // Get user ID from auth header
@@ -52,34 +52,32 @@ serve(async (req) => {
       }
     }
 
-    // Create checkout session
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items: [{
-        price: priceId,
-        quantity: 1,
-      }],
-      mode: "subscription",
-      success_url: successUrl || `${req.headers.get("origin")}/?subscription=success`,
-      cancel_url: cancelUrl || `${req.headers.get("origin")}/?subscription=cancelled`,
-      customer_email: customerEmail,
-      client_reference_id: userId,
-      allow_promotion_codes: true,
-      metadata: {
-        ...metadata,
-        userId,
-        source: 'web_checkout',
-        version: '1.0.0'
-      },
-      ...(couponCode && { discounts: [{ coupon: couponCode }] }),
+    // Verify the subscription belongs to this user
+    if (userId) {
+      const { data: subscription, error } = await supabase
+        .from("subscriptions")
+        .select("id, user_id")
+        .eq("id", subscription_id)
+        .single()
+      
+      if (error) {
+        console.error("Error fetching subscription:", error)
+      } else if (subscription && subscription.user_id !== userId) {
+        throw new Error("Unauthorized access to subscription")
+      }
+    }
+
+    // Apply coupon to subscription
+    const updatedSubscription = await stripe.subscriptions.update(subscription_id, {
+      coupon: coupon_id,
     })
 
-    return new Response(JSON.stringify({ url: session.url }), {
+    return new Response(JSON.stringify({ success: true, subscription: updatedSubscription }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     })
   } catch (error) {
-    console.error("Error creating checkout session:", error)
+    console.error("Error applying coupon:", error)
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

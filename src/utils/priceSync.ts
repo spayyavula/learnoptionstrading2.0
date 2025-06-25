@@ -9,7 +9,7 @@
 export const BASE_PRICES = {
   monthly: 29,
   yearly: 290,
-  enterprise: 25,
+  enterprise: 25, 
   pro: 75
 };
 
@@ -67,10 +67,17 @@ export function getSavingsAmount(originalPrice: number, discountedPrice: number)
  * @returns Plan details object
  */
 export function getPlanDetails(planId: 'monthly' | 'yearly' | 'enterprise') {
-  const basePrice = planId === 'monthly' ? BASE_PRICES.monthly : 
-                    planId === 'yearly' ? BASE_PRICES.yearly / 12 : 
-                    planId === 'enterprise' ? BASE_PRICES.enterprise : 
-                    BASE_PRICES.pro;
+  let basePrice;
+  
+  if (planId === 'monthly') {
+    basePrice = BASE_PRICES.monthly;
+  } else if (planId === 'yearly') {
+    basePrice = BASE_PRICES.enterprise; // Enterprise is $25/month
+  } else if (planId === 'enterprise') {
+    basePrice = BASE_PRICES.enterprise;
+  } else {
+    basePrice = BASE_PRICES.pro; // Pro is $75/month
+  }
   
   return {
     id: planId,

@@ -2,10 +2,11 @@ import React, { useMemo, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { 
   BarChart3, Briefcase, TrendingUp, FileText, PieChart, 
-  Settings, Users, Menu, X, BookOpen, Lightbulb,
+  Settings, Users, Menu, X, BookOpen, Lightbulb, CreditCard,
   Calculator, Bot, AlertTriangle, ChevronDown, ChevronRight
  } from 'lucide-react'
 import Disclaimer from './Disclaimer'
+import SubscriptionBanner from './SubscriptionBanner'
 
 // Define menu categories with their items
 const menuCategories = [
@@ -52,6 +53,7 @@ const menuCategories = [
   {
     name: 'System',
     items: [
+      { name: 'Subscription', href: '/pricing', icon: CreditCard },
       { name: 'Data Manager', href: '/app/data-manager', icon: Settings },
       { name: 'Agent API', href: '/agent', icon: Bot },
       { name: 'Settings', href: '/app/settings', icon: Settings }
@@ -291,6 +293,8 @@ export default function Layout({ children }: LayoutProps) {
         <main className="py-6">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"> 
             {/* Persistent mini disclaimer for trading pages */}
+            <SubscriptionBanner className="mb-4" />
+            
             <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-2 text-sm text-blue-700 flex items-center">
               <BookOpen className="h-4 w-4 text-blue-600 mr-2 flex-shrink-0" />
               <p>

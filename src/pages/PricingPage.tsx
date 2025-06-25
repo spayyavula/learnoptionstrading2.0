@@ -1,0 +1,97 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowLeft, Shield, AlertTriangle } from 'lucide-react';
+import PricingCard from '../components/PricingCard';
+
+const PricingPage: React.FC = () => {
+  return (
+    <div className="min-h-screen bg-gray-50 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-8">
+          <Link to="/" className="flex items-center text-blue-600 hover:text-blue-800">
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Back to Home
+          </Link>
+        </div>
+        
+        <div className="text-center mb-12">
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Choose Your Plan</h1>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            Get full access to all features and take your trading skills to the next level
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <PricingCard
+            title="Basic"
+            price={29}
+            interval="month"
+            description="Perfect for beginners"
+            features={[
+              "Access to basic trading features",
+              "Real-time market data",
+              "Basic analytics",
+              "Email support",
+              "1 paper trading account"
+            ]}
+            priceId={import.meta.env.VITE_STRIPE_PRICE_ID_BASIC || ''}
+          />
+          
+          <PricingCard
+            title="Pro"
+            price={75}
+            interval="month"
+            description="For serious traders"
+            features={[
+              "Everything in Basic",
+              "Advanced analytics",
+              "Options trading features",
+              "Priority support",
+              "5 paper trading accounts",
+              "Strategy backtesting"
+            ]}
+            popular={true}
+            priceId={import.meta.env.VITE_STRIPE_PRICE_ID_PRO || ''}
+          />
+          
+          <PricingCard
+            title="Enterprise"
+            price={25}
+            interval="month"
+            description="For organizations"
+            features={[
+              "Everything in Pro",
+              "Dedicated account manager",
+              "Custom integrations",
+              "Team collaboration features",
+              "Unlimited paper trading accounts",
+              "API access"
+            ]}
+            priceId={import.meta.env.VITE_STRIPE_PRICE_ID_ENTERPRISE || ''}
+          />
+        </div>
+        
+        <div className="mt-12 p-4 bg-yellow-50 border border-yellow-200 rounded-lg max-w-4xl mx-auto">
+          <div className="flex items-start">
+            <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 mr-2 flex-shrink-0" />
+            <div>
+              <h4 className="font-medium text-yellow-800">Important Information</h4>
+              <p className="text-sm text-yellow-700 mt-1">
+                Options World is for educational purposes only. Our platform is designed to help you learn and develop trading skills, not to provide financial advice. Options trading involves significant risk and requires proper education.
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="mt-8 text-center">
+          <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
+            <Shield className="h-4 w-4" />
+            <span>Secure payment • Cancel anytime • 14-day money-back guarantee</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PricingPage;

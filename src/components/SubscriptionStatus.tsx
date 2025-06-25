@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { CheckCircle, XCircle, Clock, CreditCard, Settings } from 'lucide-react'
 import { StripeService } from '../services/stripeService'
 import { supabase } from '../lib/supabase'
+import { Link } from 'react-router-dom'
 
 interface SubscriptionStatusProps {
   className?: string
@@ -104,19 +105,21 @@ export default function SubscriptionStatus({ className = '' }: SubscriptionStatu
       <div className={`flex items-center justify-between p-3 bg-yellow-50 border border-yellow-200 rounded-lg ${className}`}>
         <div className="flex items-center space-x-2">
           <XCircle className="h-4 w-4 text-yellow-600" />
-          <span className="text-sm font-medium text-yellow-800">Free Plan</span>
+          <span className="text-sm font-medium text-yellow-800">No Active Subscription</span>
         </div>
-        <button
-          onClick={handleUpgrade}
+        <Link
+          to="/pricing"
           className="text-xs bg-yellow-600 text-white px-3 py-1 rounded-md hover:bg-yellow-700 transition-colors"
         >
           Upgrade
-        </button>
+        </Link>
       </div>
     )
   }
 
   const planName = subscription.plan === 'yearly' ? 'Pro Yearly' : 'Pro Monthly'
+  const displayPlan = subscription.plan === 'yearly' ? 'Enterprise' : 
+                      subscription.plan === 'pro' ? 'Pro' : 'Basic';
   const nextBilling = subscription.subscription?.current_period_end 
     ? new Date(subscription.subscription.current_period_end).toLocaleDateString()
     : 'Unknown'
@@ -128,7 +131,7 @@ export default function SubscriptionStatus({ className = '' }: SubscriptionStatu
           <CheckCircle className="h-4 w-4 text-green-600" />
           <div>
             <div className="flex items-center">
-              <span className="text-sm font-medium text-green-800">{planName}</span>
+              <span className="text-sm font-medium text-green-800">{displayPlan} Plan</span>
               {subscription.termsAccepted && (
                 <span className="ml-2 px-1.5 py-0.5 bg-green-100 text-green-700 text-xs rounded">
                   Terms Accepted

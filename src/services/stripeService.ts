@@ -23,10 +23,13 @@ export class StripeService {
   // Lazy load environment variables
   private static getEnvVars() {
     return {
-      PUBLISHABLE_KEY: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY,
-      MONTHLY_PRICE_ID: import.meta.env.VITE_STRIPE_MONTHLY_PRICE_ID,
-      YEARLY_PRICE_ID: import.meta.env.VITE_STRIPE_YEARLY_PRICE_ID,
-      COFFEE_PRICE_ID: import.meta.env.VITE_STRIPE_COFFEE_PRICE_ID
+      PUBLISHABLE_KEY: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '',
+      PRICE_ID_BASIC: import.meta.env.VITE_STRIPE_PRICE_ID_BASIC || '',
+      PRICE_ID_PRO: import.meta.env.VITE_STRIPE_PRICE_ID_PRO || '',
+      PRICE_ID_ENTERPRISE: import.meta.env.VITE_STRIPE_PRICE_ID_ENTERPRISE || '',
+      MONTHLY_PRICE_ID: import.meta.env.VITE_STRIPE_MONTHLY_PRICE_ID || '',
+      YEARLY_PRICE_ID: import.meta.env.VITE_STRIPE_YEARLY_PRICE_ID || '',
+      COFFEE_PRICE_ID: import.meta.env.VITE_STRIPE_COFFEE_PRICE_ID || ''
     }
   }
   
@@ -263,38 +266,31 @@ export class StripeService {
   static getProducts(): StripeProduct[] {
     return [
       {
-        id: 'free',
-        name: 'Free Starter',
-        description: 'Basic options trading with 5 top liquid contracts',
-        price: 0,
-        currency: 'USD',
-        type: 'subscription'
-      },
-      {
-        id: 'monthly',
-        name: 'Pro Monthly',
-        description: 'Full access with advanced analytics and strategy backtesting',
+        id: 'basic',
+        name: 'Basic',
+        description: 'Basic options trading with limited features',
         price: BASE_PRICES.monthly,
         currency: 'USD',
         interval: 'month',
         type: 'subscription'
       },
       {
-        id: 'yearly',
-        name: 'Pro Yearly',
-        description: 'Everything in Pro Monthly plus 1-on-1 coaching and exclusive webinars',
-        price: BASE_PRICES.yearly,
+        id: 'pro',
+        name: 'Pro',
+        description: 'Full access with advanced analytics and strategy backtesting',
+        price: BASE_PRICES.pro,
         currency: 'USD',
-        interval: 'year',
+        interval: 'month',
         type: 'subscription'
       },
       {
-        id: 'coffee',
-        name: 'Buy Me a Coffee',
-        description: 'Support our development with a one-time contribution',
-        price: 5,
+        id: 'enterprise',
+        name: 'Enterprise',
+        description: 'Everything in Pro plus team collaboration and API access',
+        price: BASE_PRICES.enterprise,
         currency: 'USD',
-        type: 'one_time'
+        interval: 'month',
+        type: 'subscription'
       }
     ]
   }

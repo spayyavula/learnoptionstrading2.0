@@ -22,6 +22,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom'
 import { ConstantContactService } from '../services/constantContactService'
 import { StripeService } from '../services/stripeService'
+import { BASE_PRICES } from '../utils/priceSync'
 import { useState, useEffect, useRef } from 'react'
 import Disclaimer from '../components/Disclaimer'
 import { BuyMeCoffeeService } from '../services/buyMeCoffeeService'
@@ -240,11 +241,11 @@ export default function Landing() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link 
-                to="/app" 
+                to="/pricing" 
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors flex items-center justify-center"
               >
                 <Play className="mr-2 h-5 w-5" />
-                Start Trading Now
+                View Pricing
               </Link>
               <Link 
                 to="/demo" 
@@ -383,7 +384,7 @@ export default function Landing() {
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-white mb-2">Basic</h3>
                 <div className="text-4xl font-bold text-white mb-2">
-                  <span className="text-2xl">$</span>29
+                  <span className="text-2xl">$</span>{BASE_PRICES.monthly}
                   <span className="text-lg text-gray-400">/month</span>
                 </div>
                 <p className="text-gray-400">Perfect for learning the basics</p>
@@ -439,7 +440,7 @@ export default function Landing() {
                   </div>
                 )}
                 <div className="text-4xl font-bold text-white mb-2">
-                  <span className="text-2xl">$</span>75
+                  <span className="text-2xl">$</span>{BASE_PRICES.pro}
                   <span className="text-lg text-gray-400">/month</span>
                 </div>
                 {getDiscountInfo('monthly').hasDiscount && (
@@ -498,7 +499,7 @@ export default function Landing() {
                   </div>
                 )}
                 <div className="text-4xl font-bold text-white mb-2">
-                  <span className="text-2xl">$</span>25
+                  <span className="text-2xl">$</span>{BASE_PRICES.enterprise}
                   <span className="text-lg text-gray-400">/month</span>
                 </div>
                 {getDiscountInfo('yearly').hasDiscount && (

@@ -7,8 +7,13 @@ import ErrorDisplay from './components/ErrorDisplay'
 import Layout from './components/Layout'
 import Landing from './pages/Landing'
 import { OptionsProvider } from './context/OptionsContext'
+import { Elements } from '@stripe/react-stripe-js'
+import { loadStripe } from '@stripe/stripe-js'
 import { TradingProvider } from './context/TradingContext'
 import { OptionsDataProvider } from './context/OptionsDataContext'
+
+// Initialize Stripe
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '')
 
 // Lazy load page components
 const Dashboard = lazy(() => import('./pages/Dashboard'))
@@ -29,6 +34,9 @@ const Settings = lazy(() => import('./pages/Settings'))
 const OptionsDataManager = lazy(() => import('./pages/OptionsDataManager'))
 const Construction = lazy(() => import('./pages/Construction'))
 const SubscriptionPage = lazy(() => import('./pages/SubscriptionPage'))
+const PricingPage = lazy(() => import('./pages/PricingPage'))
+const SuccessPage = lazy(() => import('./pages/SuccessPage'))
+const CancelPage = lazy(() => import('./pages/CancelPage'))
 
 // Loading component for Suspense
 const LoadingFallback = () => (
@@ -42,48 +50,53 @@ const LoadingFallback = () => (
 function App() {
   return (
     <TradingProvider>
-      <ErrorBoundary>
-        <SeoHelmet />
-        <Disclaimer variant="banner" />
-        {import.meta.env.DEV && <ErrorDisplay />}
-        <OptionsProvider>
-          <OptionsDataProvider>
-            <Suspense fallback={<LoadingFallback />}>
-              <Routes>
-                <Route path="/" element={<Landing />} />
-                <Route path="/construction" element={<Construction />} />
-                <Route path="/demo" element={<Demo />} />
-                <Route path="/agent" element={<AgentDashboard />} />
-                <Route path="/subscribe" element={<SubscriptionPage />} />
-                <Route path="/app" element={
-                  <Layout>
-                    <Dashboard />
-                  </Layout>
-                } />
-                <Route path="/app/*" element={
-                  <Layout>
-                    <Routes>
-                      <Route path="/portfolio" element={<OptionsPortfolio />} />
-                      <Route path="/trading" element={<OptionsTrading />} />
-                      <Route path="/orders" element={<Orders />} />
-                      <Route path="/watchlist" element={<OptionsChain />} />
-                      <Route path="/regime" element={<RegimeAnalysis />} />
-                      <Route path="/arbitrage" element={<OptionsArbitrage />} />
-                      <Route path="/learning" element={<OptionsLearning />} />
-                      <Route path="/journal" element={<TradingJournal />} />
-                      <Route path="/strategies" element={<OptionsStrategies />} />
-                      <Route path="/analytics" element={<Analytics />} />
-                      <Route path="/community" element={<Community />} />
-                      <Route path="/settings" element={<Settings />} />
-                      <Route path="/data-manager" element={<OptionsDataManager />} />
-                    </Routes>
-                  </Layout>
-                } />
-              </Routes>
-            </Suspense>
-          </OptionsDataProvider>
-        </OptionsProvider>
-      </ErrorBoundary>
+      <Elements stripe={stripePromise}>
+        <ErrorBoundary>
+          <SeoHelmet />
+          <Disclaimer variant="banner" />
+          {import.meta.env.DEV && <ErrorDisplay />}
+          <OptionsProvider>
+            <OptionsDataProvider>
+              <Suspense fallback={<LoadingFallback />}>
+                <Routes>
+                  <Route path="/" element={<Landing />} />
+                  <Route path="/construction" element={<Construction />} />
+                  <Route path="/demo" element={<Demo />} />
+                  <Route path="/agent" element={<AgentDashboard />} />
+                  <Route path="/subscribe" element={<SubscriptionPage />} />
+                  <Route path="/pricing" element={<PricingPage />} />
+                  <Route path="/success" element={<SuccessPage />} />
+                  <Route path="/cancel" element={<CancelPage />} />
+                  <Route path="/app" element={
+                    <Layout>
+                      <Dashboard />
+                    </Layout>
+                  } />
+                  <Route path="/app/*" element={
+                    <Layout>
+                      <Routes>
+                        <Route path="/portfolio" element={<OptionsPortfolio />} />
+                        <Route path="/trading" element={<OptionsTrading />} />
+                        <Route path="/orders" element={<Orders />} />
+                        <Route path="/watchlist" element={<OptionsChain />} />
+                        <Route path="/regime" element={<RegimeAnalysis />} />
+                        <Route path="/arbitrage" element={<OptionsArbitrage />} />
+                        <Route path="/learning" element={<OptionsLearning />} />
+                        <Route path="/journal" element={<TradingJournal />} />
+                        <Route path="/strategies" element={<OptionsStrategies />} />
+                        <Route path="/analytics" element={<Analytics />} />
+                        <Route path="/community" element={<Community />} />
+                        <Route path="/settings" element={<Settings />} />
+                        <Route path="/data-manager" element={<OptionsDataManager />} />
+                      </Routes>
+                    </Layout>
+                  } />
+                </Routes>
+              </Suspense>
+            </OptionsDataProvider>
+          </OptionsProvider>
+        </ErrorBoundary>
+      </Elements>
     </TradingProvider>
   )
 }
