@@ -283,8 +283,8 @@ export default function Layout({ children }: LayoutProps) {
             </div>
             <div className="flex items-center gap-x-4 lg:gap-x-6">
               <div className="text-sm text-gray-500">
-                Learning Mode
-              </h2>
+                <h2>Learning Mode</h2>
+              </div>
             </div>
           </div>
         </div>
