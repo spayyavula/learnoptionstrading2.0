@@ -9,7 +9,7 @@
 export const BASE_PRICES = {
   monthly: 29,
   yearly: 290,
-  enterprise: 199
+  enterprise: 25
 };
 
 // Calculate yearly savings percentage
