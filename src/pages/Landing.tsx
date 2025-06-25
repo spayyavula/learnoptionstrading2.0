@@ -383,7 +383,7 @@ export default function Landing() {
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-white mb-2">Basic</h3>
                 <div className="text-4xl font-bold text-white mb-2">
-                  <span className="text-2xl">$</span>{BASE_PRICES.monthly}
+                  <span className="text-2xl">$</span>29
                   <span className="text-lg text-gray-400">/month</span>
                 </div>
                 <p className="text-gray-400">Perfect for learning the basics</p>
@@ -439,7 +439,7 @@ export default function Landing() {
                   </div>
                 )}
                 <div className="text-4xl font-bold text-white mb-2">
-                  <span className="text-2xl">$</span>{BASE_PRICES.enterprise}
+                  <span className="text-2xl">$</span>75
                   <span className="text-lg text-gray-400">/month</span>
                 </div>
                 {getDiscountInfo('monthly').hasDiscount && (
@@ -498,7 +498,7 @@ export default function Landing() {
                   </div>
                 )}
                 <div className="text-4xl font-bold text-white mb-2">
-                  <span className="text-2xl">$</span>{BASE_PRICES.yearly / 12}
+                  <span className="text-2xl">$</span>25
                   <span className="text-lg text-gray-400">/month</span>
                 </div>
                 {getDiscountInfo('yearly').hasDiscount && (

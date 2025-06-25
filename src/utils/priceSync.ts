@@ -9,7 +9,8 @@
 export const BASE_PRICES = {
   monthly: 29,
   yearly: 290,
-  enterprise: 25
+  enterprise: 25,
+  pro: 75
 };
 
 // Calculate yearly savings percentage
@@ -66,7 +67,10 @@ export function getSavingsAmount(originalPrice: number, discountedPrice: number)
  * @returns Plan details object
  */
 export function getPlanDetails(planId: 'monthly' | 'yearly' | 'enterprise') {
-  const basePrice = BASE_PRICES[planId];
+  const basePrice = planId === 'monthly' ? BASE_PRICES.monthly : 
+                    planId === 'yearly' ? BASE_PRICES.yearly / 12 : 
+                    planId === 'enterprise' ? BASE_PRICES.enterprise : 
+                    BASE_PRICES.pro;
   
   return {
     id: planId,
