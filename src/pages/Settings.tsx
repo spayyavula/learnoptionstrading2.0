@@ -91,8 +91,7 @@ export default function Settings() {
 
   const handleResetAccount = () => {
     if (window.confirm('Are you sure you want to reset your account? This will delete all positions, orders, and trading history. This action cannot be undone.')) {
-    localStorage.removeItem('mock_subscription'),
-    window.location.reload())
+      localStorage.removeItem('mock_subscription')
       window.location.reload()
     }
   }
