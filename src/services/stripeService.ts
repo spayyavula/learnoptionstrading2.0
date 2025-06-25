@@ -305,7 +305,7 @@ export class StripeService {
   /**
    * Mock checkout for development
    */
-  private static mockStripeCheckout(plan: 'monthly' | 'yearly', couponCode?: string): void {
+  private static mockStripeCheckout(plan: 'monthly' | 'yearly' | 'basic' | 'pro' | 'enterprise', couponCode?: string): void {
     const products = this.getProducts()
     const product = products.find(p => p.id === plan)
     
@@ -340,7 +340,7 @@ export class StripeService {
   /**
    * Complete mock checkout process
    */
-  private static completeMockCheckout(plan: 'monthly' | 'yearly', couponCode?: string, finalPrice?: number): void {
+  private static completeMockCheckout(plan: 'monthly' | 'yearly' | 'basic' | 'pro' | 'enterprise', couponCode?: string, finalPrice?: number): void {
     // Store mock subscription in localStorage
     const mockSubscription = {
       id: `sub_mock_${Date.now().toString()}`,
