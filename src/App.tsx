@@ -13,8 +13,18 @@ import { loadStripe } from '@stripe/stripe-js'
 import { TradingProvider } from './context/TradingContext'
 import { OptionsDataProvider } from './context/OptionsDataContext'
 
-// Initialize Stripe
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '')
+// Initialize Stripe conditionally - only if publishable key is available
+const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || ''
+const stripePromise = publishableKey ? loadStripe(publishableKey) : Promise.resolve(null)
+
+// Log Stripe initialization status
+if (import.meta.env.DEV) {
+  if (publishableKey) {
+    console.log('🔧 Stripe initialized globally with key:', publishableKey.substring(0, 8) + '...')
+  } else {
+    console.log('🔧 Stripe NOT initialized - no publishable key (using mock mode)')
+  }
+}
 
 // Lazy load page components
 const Dashboard = lazy(() => import('./pages/Dashboard'))

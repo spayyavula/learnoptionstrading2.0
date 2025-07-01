@@ -9,8 +9,8 @@
 export const BASE_PRICES = {
   monthly: 29,
   yearly: 290, 
-  enterprise: 25,
-  pro: 75
+  enterprise: 199,  // Updated to match Stripe
+  pro: 79
 };
 
 // Calculate yearly savings percentage

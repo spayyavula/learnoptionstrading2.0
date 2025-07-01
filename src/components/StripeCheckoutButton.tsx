@@ -12,7 +12,9 @@ interface StripeCheckoutButtonProps {
   onCheckoutStarted?: () => void;
 }
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+// Only initialize Stripe if we have a valid publishable key
+const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '';
+const stripePromise = publishableKey ? loadStripe(publishableKey) : Promise.resolve(null);
 
 const StripeCheckoutButton: React.FC<StripeCheckoutButtonProps> = ({
   priceId,
@@ -35,13 +37,33 @@ const StripeCheckoutButton: React.FC<StripeCheckoutButtonProps> = ({
         onCheckoutStarted();
       }
 
+      // Check if we're in development mode or Stripe is not available
+      if (import.meta.env.DEV || !publishableKey) {
+        console.log('🧪 StripeCheckoutButton: Using mock checkout in development mode');
+        
+        // Simulate loading time
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Use StripeService for consistent mock checkout
+        const { StripeService } = await import('../services/stripeService');
+        
+        // Determine plan type from priceId or planName
+        let plan: 'monthly' | 'yearly' | 'pro' | 'enterprise' = 'monthly';
+        if (planName?.toLowerCase().includes('yearly')) plan = 'yearly';
+        else if (planName?.toLowerCase().includes('pro')) plan = 'pro';
+        else if (planName?.toLowerCase().includes('enterprise')) plan = 'enterprise';
+        
+        await StripeService.redirectToCheckout(plan, undefined, couponCode, false);
+        return;
+      }
+
       const stripe = await stripePromise;
       
       if (!stripe) {
-        throw new Error('Stripe failed to load');
+        throw new Error('Stripe not available - please refresh and try again');
       }
 
-      // Create checkout session on the server
+      // Create checkout session on the server (this would need a backend)
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: {
@@ -55,10 +77,14 @@ const StripeCheckoutButton: React.FC<StripeCheckoutButtonProps> = ({
         }),
       });
 
+      if (!response.ok) {
+        throw new Error('Failed to create checkout session - server error');
+      }
+
       const session = await response.json();
       
       if (!session || !session.id) {
-        throw new Error('Failed to create checkout session');
+        throw new Error('Invalid checkout session response');
       }
 
       // Redirect to Stripe Checkout

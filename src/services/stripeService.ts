@@ -1,4 +1,46 @@
 import { BASE_PRICES } from '../utils/priceSync'
+import { JsonDebugger } from '../utils/jsonDebugger'
+
+// Add utility function for safe JSON parsing with enhanced debugging
+function safeJsonParse(jsonString: string, fallback: any = null, context: string = 'StripeService') {
+  return JsonDebugger.safeParse(jsonString, context) ?? fallback
+}
+
+// Add utility function for safe localStorage operations
+function safeLocalStorageGet(key: string, fallback: any = null) {
+  try {
+    const item = localStorage.getItem(key)
+    if (!item) return fallback
+    return safeJsonParse(item, fallback, `localStorage.get(${key})`)
+  } catch (error) {
+    console.error(`❌ LocalStorage get failed for key "${key}":`, error)
+    JsonDebugger.logJsonOperation('LOCALSTORAGE_GET_ERROR', { key, error: error instanceof Error ? error.message : 'Unknown' }, 'localStorage')
+    // Clear corrupted data
+    try {
+      localStorage.removeItem(key)
+    } catch (clearError) {
+      console.error('❌ Failed to clear corrupted localStorage:', clearError)
+    }
+    return fallback
+  }
+}
+
+function safeLocalStorageSet(key: string, value: any) {
+  try {
+    const jsonString = JsonDebugger.safeStringify(value, `localStorage.set(${key})`)
+    if (!jsonString) {
+      console.error(`❌ Failed to stringify value for localStorage key "${key}"`)
+      return false
+    }
+    localStorage.setItem(key, jsonString)
+    JsonDebugger.logJsonOperation('LOCALSTORAGE_SET_SUCCESS', { key, value }, 'localStorage')
+    return true
+  } catch (error) {
+    console.error(`❌ LocalStorage set failed for key "${key}":`, error)
+    JsonDebugger.logJsonOperation('LOCALSTORAGE_SET_ERROR', { key, error: error instanceof Error ? error.message : 'Unknown' }, 'localStorage')
+    return false
+  }
+}
 
 interface StripeCheckoutOptions {
   priceId: string
@@ -25,28 +67,34 @@ export class StripeService {
    */
   static updateMockSubscriptionStructure(): void {
     try {
-      const mockSubscription = localStorage.getItem('mock_subscription')
-      if (mockSubscription) {
-        const subscription = JSON.parse(mockSubscription)
-        
+      const subscription = safeLocalStorageGet('mock_subscription')
+      if (subscription && typeof subscription === 'object') {
         // Check if customer_id is missing
         if (!subscription.customer_id) {
           console.log('🔧 Updating mock subscription to include customer_id')
           subscription.customer_id = `cus_mock_${Date.now().toString()}`
-          localStorage.setItem('mock_subscription', JSON.stringify(subscription))
-          console.log('✅ Mock subscription updated:', subscription)
+          const success = safeLocalStorageSet('mock_subscription', subscription)
+          if (success) {
+            console.log('✅ Mock subscription updated:', subscription)
+          } else {
+            console.error('❌ Failed to save updated mock subscription')
+          }
         }
       }
     } catch (error) {
       console.error('❌ Error updating mock subscription structure:', error)
       // Clear corrupted data
-      localStorage.removeItem('mock_subscription')
+      try {
+        localStorage.removeItem('mock_subscription')
+      } catch (clearError) {
+        console.error('❌ Failed to clear corrupted data:', clearError)
+      }
     }
   }
 
   // Lazy load environment variables
   private static getEnvVars() {
-    return {
+    const envVars = {
       PUBLISHABLE_KEY: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '',
       PRICE_ID_BASIC: import.meta.env.VITE_STRIPE_PRICE_ID_BASIC || '',
       PRICE_ID_PRO: import.meta.env.VITE_STRIPE_PRICE_ID_PRO || '',
@@ -55,6 +103,20 @@ export class StripeService {
       YEARLY_PRICE_ID: import.meta.env.VITE_STRIPE_YEARLY_PRICE_ID || '',
       COFFEE_PRICE_ID: import.meta.env.VITE_STRIPE_COFFEE_PRICE_ID || ''
     }
+    
+    // Debug logging to help troubleshoot environment issues
+    console.log('🔧 Stripe Environment Variables Debug:', {
+      DEV_MODE: import.meta.env.DEV,
+      MODE: import.meta.env.MODE,
+      PUBLISHABLE_KEY_LENGTH: envVars.PUBLISHABLE_KEY.length,
+      PUBLISHABLE_KEY_PREFIX: envVars.PUBLISHABLE_KEY.substring(0, 8) || 'EMPTY',
+      HAS_MONTHLY_PRICE: !!envVars.MONTHLY_PRICE_ID,
+      HAS_YEARLY_PRICE: !!envVars.YEARLY_PRICE_ID,
+      HAS_PRO_PRICE: !!envVars.PRICE_ID_PRO,
+      HAS_ENTERPRISE_PRICE: !!envVars.PRICE_ID_ENTERPRISE
+    })
+    
+    return envVars
   }
   
   private static readonly API_BASE_URL = '/api/stripe'
@@ -71,11 +133,31 @@ export class StripeService {
     }
 
     try {
+      console.log('🔄 Loading Stripe.js...')
       // Dynamically import Stripe
       const { loadStripe } = await import('@stripe/stripe-js')
-      return await loadStripe(PUBLISHABLE_KEY)
+      const stripe = await loadStripe(PUBLISHABLE_KEY)
+      
+      if (!stripe) {
+        throw new Error('Stripe failed to initialize - returned null')
+      }
+      
+      console.log('✅ Stripe.js loaded successfully')
+      return stripe
     } catch (error) {
-      console.error('Failed to load Stripe:', error)
+      console.error('❌ Failed to load Stripe:', error)
+      
+      // If this is a network/JSON error, provide helpful context
+      if (error instanceof Error) {
+        if (error.message.includes('JSON') || error.message.includes('fetch')) {
+          console.error('🌐 Network or JSON parsing error detected. This may be due to:')
+          console.error('  - Network connectivity issues')
+          console.error('  - Stripe API being temporarily unavailable')
+          console.error('  - Invalid Stripe publishable key')
+          console.error('  - CORS or CSP restrictions')
+        }
+      }
+      
       return null
     }
   }
@@ -121,13 +203,30 @@ export class StripeService {
       
       console.log('🔑 Environment check:', { 
         DEV: import.meta.env.DEV, 
+        MODE: import.meta.env.MODE,
         PUBLISHABLE_KEY: PUBLISHABLE_KEY ? '✅ Present' : '❌ Missing',
+        PUBLISHABLE_KEY_TYPE: PUBLISHABLE_KEY?.startsWith('pk_live_') ? '🔴 LIVE' : PUBLISHABLE_KEY?.startsWith('pk_test_') ? '🟡 TEST' : '❌ Invalid/Missing',
         priceId: priceId ? '✅ Present' : '❌ Missing'
       })
       
-      // Check if we're in development mode or missing Stripe configuration
-      if (import.meta.env.DEV || !PUBLISHABLE_KEY || !priceId) {
-        console.log('🧪 Using mock checkout - Development mode or missing Stripe configuration')
+      // Force mock checkout in development mode regardless of keys
+      // This prevents accidental live payments during development
+      if (import.meta.env.DEV) {
+        console.log('🧪 Development mode detected - Using mock checkout for safety')
+        console.log('💡 To test real Stripe in dev, set NODE_ENV=production')
+        
+        try {
+          await this.mockStripeCheckoutAsync(plan, couponCode, isDeal)
+          return
+        } catch (mockError) {
+          console.error('❌ Mock checkout failed:', mockError)
+          throw new Error(`Mock checkout failed: ${mockError instanceof Error ? mockError.message : 'Unknown error'}`)
+        }
+      }
+      
+      // Only allow real Stripe in production mode
+      if (!PUBLISHABLE_KEY || !priceId) {
+        console.log('🧪 Missing Stripe configuration - Using mock checkout')
         
         try {
           await this.mockStripeCheckoutAsync(plan, couponCode, isDeal)
@@ -568,7 +667,11 @@ export class StripeService {
     }
     
     console.log('💾 Storing subscription data:', mockSubscription)
-    localStorage.setItem('mock_subscription', JSON.stringify(mockSubscription))
+    const success = safeLocalStorageSet('mock_subscription', mockSubscription)
+    if (!success) {
+      console.error('❌ Failed to store mock subscription data')
+      throw new Error('Failed to save subscription data')
+    }
     
     // Apply coupon usage if provided
     if (couponCode) {
@@ -611,7 +714,12 @@ export class StripeService {
         created: new Date().toISOString()
       }
       
-      localStorage.setItem('mock_coffee_payment', JSON.stringify(mockPayment))
+      const success = safeLocalStorageSet('mock_coffee_payment', mockPayment)
+      if (!success) {
+        console.error('❌ Failed to store mock coffee payment data')
+        alert('Error: Failed to save payment data')
+        return
+      }
       
       // Redirect to success page
       window.location.href = '/?coffee=success'
@@ -639,23 +747,15 @@ export class StripeService {
       // Update mock subscription structure if needed
       this.updateMockSubscriptionStructure()
       
-      const mockSubscription = localStorage.getItem('mock_subscription')
-      if (mockSubscription) {
-        try {
-          const subscription = JSON.parse(mockSubscription)
-          const isActive = subscription.status === 'active' && new Date(subscription.current_period_end) > new Date()
-          
-          return {
-            active: isActive,
-            plan: subscription.plan,
-            subscription,
-            termsAccepted: subscription.terms_accepted || false
-          }
-        } catch (parseError) {
-          console.error('❌ Error parsing mock subscription data:', parseError)
-          // Clear corrupted data
-          localStorage.removeItem('mock_subscription')
-          return { active: false, termsAccepted: false }
+      const subscription = safeLocalStorageGet('mock_subscription')
+      if (subscription && typeof subscription === 'object') {
+        const isActive = subscription.status === 'active' && new Date(subscription.current_period_end) > new Date()
+        
+        return {
+          active: isActive,
+          plan: subscription.plan,
+          subscription,
+          termsAccepted: subscription.terms_accepted || false
         }
       }
       
