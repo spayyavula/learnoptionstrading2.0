@@ -38,23 +38,39 @@ const StripeCheckoutButton: React.FC<StripeCheckoutButtonProps> = ({
       }
 
       // Check if we're in development mode or Stripe is not available
+      console.log('🔧 StripeCheckoutButton Debug:', {
+        DEV: import.meta.env.DEV,
+        publishableKey: publishableKey || '(empty)',
+        condition: (import.meta.env.DEV || !publishableKey),
+        planName,
+        priceId,
+        couponCode
+      });
+      
       if (import.meta.env.DEV || !publishableKey) {
         console.log('🧪 StripeCheckoutButton: Using mock checkout in development mode');
         
         // Simulate loading time
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Use StripeService for consistent mock checkout
-        const { StripeService } = await import('../services/stripeService');
-        
-        // Determine plan type from priceId or planName
-        let plan: 'monthly' | 'yearly' | 'pro' | 'enterprise' = 'monthly';
-        if (planName?.toLowerCase().includes('yearly')) plan = 'yearly';
-        else if (planName?.toLowerCase().includes('pro')) plan = 'pro';
-        else if (planName?.toLowerCase().includes('enterprise')) plan = 'enterprise';
-        
-        await StripeService.redirectToCheckout(plan, undefined, couponCode, false);
-        return;
+        try {
+          // Use StripeService for consistent mock checkout
+          const { StripeService } = await import('../services/stripeService');
+          
+          // Determine plan type from priceId or planName
+          let plan: 'monthly' | 'yearly' | 'pro' | 'enterprise' = 'monthly';
+          if (planName?.toLowerCase().includes('yearly')) plan = 'yearly';
+          else if (planName?.toLowerCase().includes('pro')) plan = 'pro';
+          else if (planName?.toLowerCase().includes('enterprise')) plan = 'enterprise';
+          
+          console.log('🧪 StripeCheckoutButton: Calling StripeService.redirectToCheckout with plan:', plan);
+          await StripeService.redirectToCheckout(plan, undefined, couponCode, false);
+          console.log('🧪 StripeCheckoutButton: Mock checkout completed successfully');
+          return;
+        } catch (mockError) {
+          console.error('❌ StripeCheckoutButton: Mock checkout failed:', mockError);
+          throw new Error(`Mock checkout failed: ${mockError instanceof Error ? mockError.message : 'Unknown error'}`);
+        }
       }
 
       const stripe = await stripePromise;

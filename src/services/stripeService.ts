@@ -205,8 +205,10 @@ export class StripeService {
         DEV: import.meta.env.DEV, 
         MODE: import.meta.env.MODE,
         PUBLISHABLE_KEY: PUBLISHABLE_KEY ? '✅ Present' : '❌ Missing',
+        PUBLISHABLE_KEY_VALUE: PUBLISHABLE_KEY || '(empty)',
         PUBLISHABLE_KEY_TYPE: PUBLISHABLE_KEY?.startsWith('pk_live_') ? '🔴 LIVE' : PUBLISHABLE_KEY?.startsWith('pk_test_') ? '🟡 TEST' : '❌ Invalid/Missing',
-        priceId: priceId ? '✅ Present' : '❌ Missing'
+        priceId: priceId ? '✅ Present' : '❌ Missing',
+        priceId_VALUE: priceId || '(empty)'
       })
       
       // Force mock checkout in development mode regardless of keys
