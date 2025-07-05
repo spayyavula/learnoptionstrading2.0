@@ -784,3 +784,11 @@ export class StripeService {
   }
 
 }
+
+// Add to your environment variables in Netlify:
+const paymentLinks = {
+  monthly: import.meta.env.VITE_STRIPE_MONTHLY_PAYMENT_LINK || 'https://buy.stripe.com/7sYdR9fuxfs33Rp56q0kE00',
+  yearly: import.meta.env.VITE_STRIPE_YEARLY_PAYMENT_LINK || 'https://buy.stripe.com/7sYdR9fuxfs33Rp56q0kE00',
+  pro: import.meta.env.VITE_STRIPE_PRO_PAYMENT_LINK || 'https://buy.stripe.com/7sYdR9fuxfs33Rp56q0kE00',
+  enterprise: import.meta.env.VITE_STRIPE_ENTERPRISE_PAYMENT_LINK || 'https://buy.stripe.com/7sYdR9fuxfs33Rp56q0kE00'
+}
