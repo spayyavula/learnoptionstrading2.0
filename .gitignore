@@ -13,3 +13,11 @@ coverage/
 .env
 .env.*
 *.env
+# SECURITY - NEVER COMMIT ENVIRONMENT FILES!
+.env
+.env.*
+*.env
+.env.production
+.env.development
+.env.local
+.env.staging
