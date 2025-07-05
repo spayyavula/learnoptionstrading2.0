@@ -1,161 +1,204 @@
 import { StripeService } from '../services/stripeService'
 import { JsonDebugger } from './jsonDebugger'
 
+interface DiagnosticResult {
+  category: string
+  name: string
+  status: 'pass' | 'fail' | 'warning'
+  message: string
+  details?: any
+}
+
 /**
  * Diagnostic utility to help identify subscription and JSON parsing issues
  */
 export class DiagnosticTool {
+  private static results: DiagnosticResult[] = []
+
   /**
-   * Run comprehensive diagnostics
+   * Run all diagnostic checks
    */
-  static async runDiagnostics() {
-    console.log('🔍 Running Subscription Diagnostics...')
-    console.log('═'.repeat(60))
+  static async runDiagnostics(): Promise<DiagnosticResult[]> {
+    this.results = []
     
-    // 1. Environment Variables Check
-    console.log('📋 1. Environment Variables:')
-    const envCheck = {
-      NODE_ENV: import.meta.env.MODE,
-      DEV_MODE: import.meta.env.DEV,
-      STRIPE_PUBLISHABLE_KEY: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ? '✅ Present' : '❌ Missing',
-      STRIPE_SECRET_KEY: import.meta.env.VITE_STRIPE_SECRET_KEY ? '✅ Present' : '❌ Missing',
-      MONTHLY_PRICE_ID: import.meta.env.VITE_STRIPE_MONTHLY_PRICE_ID || '❌ Missing',
-      YEARLY_PRICE_ID: import.meta.env.VITE_STRIPE_YEARLY_PRICE_ID || '❌ Missing',
-      PRO_PRICE_ID: import.meta.env.VITE_STRIPE_PRICE_ID_PRO || '❌ Missing',
-      ENTERPRISE_PRICE_ID: import.meta.env.VITE_STRIPE_PRICE_ID_ENTERPRISE || '❌ Missing',
-      COFFEE_PRICE_ID: import.meta.env.VITE_STRIPE_COFFEE_PRICE_ID || '❌ Missing',
-      SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL ? '✅ Present' : '❌ Missing',
-      SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY ? '✅ Present' : '❌ Missing'
+    console.log('🔍 Running diagnostic checks...')
+    
+    // Environment checks
+    this.checkEnvironmentVariables()
+    
+    // Browser compatibility
+    this.checkBrowserCompatibility()
+    
+    // LocalStorage
+    this.checkLocalStorage()
+    
+    // Network connectivity
+    await this.checkNetworkConnectivity()
+    
+    // Service availability
+    await this.checkServices()
+    
+    console.log('✅ Diagnostic checks complete:', this.results)
+    return this.results
+  }
+
+  /**
+   * Check environment variables
+   */
+  private static checkEnvironmentVariables(): void {
+    const requiredEnvVars = [
+      { key: 'VITE_STRIPE_PUBLISHABLE_KEY', name: 'Stripe Publishable Key' },
+      { key: 'VITE_CONSTANT_CONTACT_API_KEY', name: 'Constant Contact API Key' },
+      { key: 'VITE_CONSTANT_CONTACT_ACCESS_TOKEN', name: 'Constant Contact Access Token' }
+    ]
+
+    for (const envVar of requiredEnvVars) {
+      const value = import.meta.env[envVar.key]
+      
+      if (!value) {
+        this.addResult('Environment', envVar.name, 'fail', `${envVar.key} is not set`)
+      } else if (value.length < 10) {
+        this.addResult('Environment', envVar.name, 'warning', `${envVar.key} seems too short`)
+      } else {
+        this.addResult('Environment', envVar.name, 'pass', `${envVar.key} is configured`)
+      }
     }
-    console.table(envCheck)
-    
-    // 2. localStorage Health Check
-    console.log('💾 2. LocalStorage Health Check:')
+  }
+
+  /**
+   * Check browser compatibility
+   */
+  private static checkBrowserCompatibility(): void {
+    // Check for required APIs
+    const requiredAPIs = [
+      { name: 'localStorage', check: () => typeof Storage !== 'undefined' },
+      { name: 'fetch', check: () => typeof fetch !== 'undefined' },
+      { name: 'Promise', check: () => typeof Promise !== 'undefined' },
+      { name: 'URLSearchParams', check: () => typeof URLSearchParams !== 'undefined' }
+    ]
+
+    for (const api of requiredAPIs) {
+      if (api.check()) {
+        this.addResult('Browser', api.name, 'pass', `${api.name} is supported`)
+      } else {
+        this.addResult('Browser', api.name, 'fail', `${api.name} is not supported`)
+      }
+    }
+  }
+
+  /**
+   * Check localStorage functionality
+   */
+  private static checkLocalStorage(): void {
     try {
       const testKey = 'diagnostic_test'
-      const testData = { test: true, timestamp: Date.now() }
+      const testValue = { test: true, timestamp: Date.now() }
       
       // Test write
-      localStorage.setItem(testKey, JSON.stringify(testData))
-      console.log('✅ localStorage write: OK')
+      localStorage.setItem(testKey, JSON.stringify(testValue))
       
       // Test read
-      const retrieved = JSON.parse(localStorage.getItem(testKey) || '{}')
-      console.log('✅ localStorage read: OK')
+      const retrieved = localStorage.getItem(testKey)
+      if (!retrieved) {
+        throw new Error('Failed to retrieve test data')
+      }
       
-      // Test cleanup
+      // Test parse
+      const parsed = JSON.parse(retrieved)
+      if (parsed.test !== true) {
+        throw new Error('Data corruption detected')
+      }
+      
+      // Cleanup
       localStorage.removeItem(testKey)
-      console.log('✅ localStorage cleanup: OK')
       
-      // Check existing subscription data
-      const mockSub = localStorage.getItem('mock_subscription')
-      if (mockSub) {
-        try {
-          const parsed = JSON.parse(mockSub)
-          console.log('✅ Mock subscription data: Valid JSON')
-          console.log('📊 Subscription details:', {
-            id: parsed.id,
-            plan: parsed.plan,
-            status: parsed.status,
-            hasCustomerId: !!parsed.customer_id
-          })
-        } catch (error) {
-          console.error('❌ Mock subscription data: Corrupted JSON')
-          console.error('Raw data:', mockSub)
-        }
-      } else {
-        console.log('ℹ️ No mock subscription data found')
-      }
-      
+      this.addResult('Storage', 'localStorage', 'pass', 'localStorage is working correctly')
     } catch (error) {
-      console.error('❌ localStorage error:', error)
+      this.addResult('Storage', 'localStorage', 'fail', `localStorage error: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
-    
-    // 3. Stripe Integration Test
-    console.log('💳 3. Stripe Integration Test:')
-    try {
-      const stripe = await StripeService.initializeStripe()
-      if (stripe) {
-        console.log('✅ Stripe.js loaded successfully')
-      } else {
-        console.log('⚠️ Stripe.js not loaded (expected in dev mode)')
-      }
-    } catch (error) {
-      console.error('❌ Stripe initialization error:', error)
-    }
-    
-    // 4. Network Connectivity Test
-    console.log('🌐 4. Network Connectivity Test:')
+  }
+
+  /**
+   * Check network connectivity
+   */
+  private static async checkNetworkConnectivity(): Promise<void> {
     try {
       // Test basic connectivity
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 5000)
+      const response = await fetch('https://httpbin.org/get', {
+        method: 'GET',
+        timeout: 5000
+      } as any)
       
-      const response = await fetch('https://api.stripe.com/v1', {
-        method: 'HEAD',
-        signal: controller.signal
-      })
-      
-      clearTimeout(timeoutId)
-      console.log(`✅ Stripe API reachable (${response.status})`)
-    } catch (error) {
-      if (error instanceof Error) {
-        if (error.name === 'AbortError') {
-          console.error('❌ Network timeout - connection too slow')
-        } else {
-          console.error('❌ Network error:', error.message)
-        }
+      if (response.ok) {
+        this.addResult('Network', 'Internet Connectivity', 'pass', 'Internet connection is working')
+      } else {
+        this.addResult('Network', 'Internet Connectivity', 'warning', `HTTP ${response.status}: ${response.statusText}`)
       }
+    } catch (error) {
+      this.addResult('Network', 'Internet Connectivity', 'fail', `Network error: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
-    
-    // 5. JSON Debugger Report
-    console.log('🔍 5. JSON Debugger Report:')
-    JsonDebugger.exportLog()
-    
-    console.log('═'.repeat(60))
-    console.log('🎯 Diagnostics Complete!')
-    console.log('💡 If you see any ❌ errors above, those need to be fixed.')
-    console.log('📋 Copy the entire output and share it for further debugging.')
   }
-  
+
   /**
-   * Test subscription flow without actual payment
+   * Check service availability
    */
-  static async testSubscriptionFlow(plan: 'monthly' | 'yearly' | 'pro' | 'enterprise' = 'monthly') {
-    console.log(`🧪 Testing ${plan} subscription flow...`)
-    
+  private static async checkServices(): Promise<void> {
+    // Check Stripe
     try {
-      // This will trigger the mock flow in development
-      await StripeService.redirectToCheckout(plan, 'test@example.com', undefined, false)
-      console.log('✅ Subscription flow test completed')
+      const { loadStripe } = await import('@stripe/stripe-js')
+      this.addResult('Services', 'Stripe SDK', 'pass', 'Stripe SDK loaded successfully')
     } catch (error) {
-      console.error('❌ Subscription flow test failed:', error)
+      this.addResult('Services', 'Stripe SDK', 'fail', `Stripe SDK error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+
+    // Check JsonDebugger
+    try {
+      JsonDebugger.safeParse('{"test": true}', 'diagnostic')
+      this.addResult('Services', 'JsonDebugger', 'pass', 'JsonDebugger is working')
+    } catch (error) {
+      this.addResult('Services', 'JsonDebugger', 'fail', `JsonDebugger error: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
-  
+
   /**
-   * Clear all subscription data for clean testing
+   * Add a diagnostic result
    */
-  static clearAllSubscriptionData() {
-    console.log('🧹 Clearing all subscription data...')
-    
-    const keysToRemove = [
-      'mock_subscription',
-      'mock_coffee_payment',
-      'terms_accepted',
-      'coupon_usage'
-    ]
-    
-    keysToRemove.forEach(key => {
-      try {
-        localStorage.removeItem(key)
-        console.log(`✅ Cleared ${key}`)
-      } catch (error) {
-        console.error(`❌ Failed to clear ${key}:`, error)
-      }
+  private static addResult(category: string, name: string, status: 'pass' | 'fail' | 'warning', message: string, details?: any): void {
+    this.results.push({
+      category,
+      name,
+      status,
+      message,
+      details
     })
-    
-    console.log('🎯 Subscription data cleared. You can now test fresh flows.')
+  }
+
+  /**
+   * Get results summary
+   */
+  static getSummary(): { total: number; passed: number; failed: number; warnings: number } {
+    return {
+      total: this.results.length,
+      passed: this.results.filter(r => r.status === 'pass').length,
+      failed: this.results.filter(r => r.status === 'fail').length,
+      warnings: this.results.filter(r => r.status === 'warning').length
+    }
+  }
+
+  /**
+   * Export results as JSON
+   */
+  static exportResults(): string {
+    return JsonDebugger.safeStringify({
+      timestamp: new Date().toISOString(),
+      results: this.results,
+      summary: this.getSummary(),
+      environment: {
+        userAgent: navigator.userAgent,
+        url: window.location.href,
+        mode: import.meta.env.MODE
+      }
+    }, 'diagnostic-export') || '{}'
   }
 }
 
