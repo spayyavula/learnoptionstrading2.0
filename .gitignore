@@ -21,3 +21,6 @@ coverage/
 .env.development
 .env.local
 .env.staging
+
+# Local Netlify folder
+.netlify
