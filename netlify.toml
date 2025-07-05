@@ -1,7 +1,7 @@
 # Netlify configuration for Learn Options Trading App
 [build]
-  # Build command that clears cache and rebuilds
-  command = "npm run clean:windows && npm install && npm run build"
+  # Linux-compatible build command
+  command = "npm ci && npm run build"
   
   # Output directory
   publish = "dist"
@@ -11,35 +11,14 @@
 
 [build.environment]
   # Node version (use LTS)
-  NODE_VERSION = "18"
-  NPM_VERSION = "9"
+  NODE_VERSION = "20"
+  NPM_VERSION = "10"
   
   # Disable telemetry for faster builds
-  NEXT_TELEMETRY_DISABLED = "1"
   CI = "true"
 
-# Build processing settings
-[build.processing]
-  # Skip processing of images (faster builds)
-  skip_processing = false
-
-[build.processing.css]
-  # Enable CSS bundling
-  bundle = true
-  minify = true
-
-[build.processing.js]
-  # Enable JS bundling and minification
-  bundle = true
-  minify = true
-
-[build.processing.html]
-  # Pretty URLs
-  pretty_urls = true
-
-# Cache settings
+# Cache settings - cache node_modules but not Vite cache
 [build.cache]
-  # Cache node_modules but not Vite cache
   paths = ["node_modules"]
 
 # Redirects for SPA routing
@@ -47,8 +26,6 @@
   from = "/*"
   to = "/index.html"
   status = 200
-  force = false
-  conditions = {Role = ["admin"], Country = ["US"]}
 
 # API redirects (for future backend integration)
 [[redirects]]
@@ -83,23 +60,15 @@
 
 # Environment-specific builds
 [context.production]
-  command = "npm run clean:windows && npm ci && npm run build"
+  command = "npm ci && npm run build"
   environment = { NODE_ENV = "production" }
 
 [context.deploy-preview]
-  command = "npm run clean:windows && npm install && npm run build"
+  command = "npm install && npm run build"
   environment = { NODE_ENV = "development" }
 
 [context.branch-deploy]
-  command = "npm run clean:windows && npm install && npm run build"
-
-# Plugin configuration
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
-
-# Form handling (if you add contact forms)
-[form]
-  settings = { external = false }
+  command = "rm -rf node_modules/.vite && npm install && npm run build"
 
 # Functions settings (for future serverless functions)
 [functions]

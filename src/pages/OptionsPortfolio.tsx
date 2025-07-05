@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { TrendingUp, TrendingDown, DollarSign, Percent, Calculator } from 'lucide-react'
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts'
 import { useOptionsContext } from '../context/OptionsContext'
-import { format } from 'date-fns'
+import { format, parseISO } from 'date-fns'
 
 const COLORS = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4']
 const CHART_COLORS = {

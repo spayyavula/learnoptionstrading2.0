@@ -7,27 +7,15 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
-    rollupOptions: {
-      output: {
-        // Force new chunk names with timestamp
-        entryFileNames: `assets/[name]-[hash]-${Date.now()}.js`,
-        chunkFileNames: `assets/[name]-[hash]-${Date.now()}.js`,
-        assetFileNames: `assets/[name]-[hash]-${Date.now()}.[ext]`,
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          router: ['react-router-dom'],
-          pricing: ['./src/pages/PricingPage'] // Force PricingPage into separate chunk
-        }
-      }
+    target: 'esnext',
+    minify: 'esbuild'
+  },
+  resolve: {
+    alias: {
+      '@': '/src'
     }
   },
-  // Clear all caches
   optimizeDeps: {
-    force: true
-  },
-  server: {
-    fs: {
-      strict: false
-    }
+    include: ['react', 'react-dom']
   }
 })
