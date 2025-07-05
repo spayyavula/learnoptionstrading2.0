@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { 
+  ArrowRight, 
   TrendingUp, 
   BookOpen, 
   Users, 
@@ -10,15 +11,15 @@ import {
   Play,
   BarChart3,
   Target,
-  Mail
+  Mail,
+  Star,
 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ConstantContactService } from '../services/constantContactService'
 import { StripeService } from '../services/stripeService'
-import { BASE_PRICES } from '../utils/priceSync'
-import { useState, useEffect } from 'react'
-import { YEARLY_SAVINGS_PERCENT } from '../utils/priceSync'
+import { BASE_PRICES, YEARLY_SAVINGS_PERCENT } from '../utils/priceSync'
 import TermsAgreement from '../components/TermsAgreement'
+import StripeCheckout from '../components/StripeCheckout'
 
 export default function Landing() {
   const navigate = useNavigate()
@@ -29,6 +30,7 @@ export default function Landing() {
   const [subscriptionSuccess, setSubscriptionSuccess] = useState(false)
   const [showTermsModal, setShowTermsModal] = useState(false)
   const [pendingSubscription, setPendingSubscription] = useState<{plan: 'monthly' | 'yearly' | 'pro' | 'enterprise'} | null>(null)
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('yearly')
 
   // Clean up useEffect - remove coupon initialization
   React.useEffect(() => {
@@ -89,407 +91,403 @@ export default function Landing() {
     setShowTermsModal(true)
   }
 
+  const handleCheckoutSuccess = () => {
+    console.log('✅ Checkout completed successfully from Landing page')
+  }
+
+  const handleCheckoutError = (error: string) => {
+    console.error('❌ Checkout error from Landing page:', error)
+    // Show user-friendly error message
+    alert(`Checkout Error: ${error}\n\nPlease try again or contact support.`)
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900">
-      {/* Hero Section */}
-      <header className="relative overflow-hidden" id="home">
-        <div className="absolute inset-0 bg-black opacity-50"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          {subscriptionSuccess && (
-            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6" role="alert">
-              <strong className="font-bold">Success! </strong>
-              <span className="block sm:inline">Thank you for subscribing to Learn Options Trading Academy! Your account has been activated.</span>
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <header className="bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <h1 className="text-2xl font-bold">Learn Options Trading</h1>
+              </div>
             </div>
-          )}
-          <div className="text-center">
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
-              Learn Options Trading Academy
-            </h1>
-            <p className="text-xl md:text-2xl text-gray-300 mb-6 max-w-3xl mx-auto">
-              Advanced analytics, real-time data, and AI-powered insights to develop your options trading expertise
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link 
-                to="/pricing" 
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors flex items-center justify-center"
+            <div className="flex items-center space-x-4">
+              <Link
+                to="/pricing"
+                className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
               >
-                <Play className="mr-2 h-5 w-5" />
-                View Pricing
+                Pricing
               </Link>
-              <Link 
-                to="/demo" 
-                className="border border-white text-white hover:bg-white hover:text-gray-900 px-8 py-4 rounded-lg text-lg font-semibold transition-colors flex items-center justify-center"
+              <Link
+                to="/app"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
               >
-                <Info className="mr-2 h-5 w-5" />
-                View Demo
+                Get Started
               </Link>
             </div>
           </div>
         </div>
       </header>
 
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 text-white py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+              Master Options Trading
+              <span className="block text-blue-400">Risk-Free</span>
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto">
+              Learn options trading with our comprehensive educational platform. 
+              Practice with virtual money before risking real capital.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                to="/app"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors flex items-center justify-center"
+              >
+                Start Learning Free
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+              <Link
+                to="/pricing"
+                className="border-2 border-white text-white hover:bg-white hover:text-gray-900 px-8 py-4 rounded-lg text-lg font-semibold transition-colors"
+              >
+                View Pricing
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
-      <section className="py-20 bg-gray-900" id="features">
+      <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">
-              Everything You Need to Learn
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Why Choose Our Platform?
             </h2>
-            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-              Professional-grade tools and insights that help you develop trading expertise
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Everything you need to learn options trading safely and effectively
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-gray-800 p-8 rounded-xl hover:bg-gray-750 transition-colors">
-              <TrendingUp className="h-12 w-12 text-blue-500 mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-3">Real-Time Analytics</h3>
-              <p className="text-gray-400">
-                Learn technical analysis with advanced charting tools and real-time market data
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center p-6">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <BookOpen className="h-8 w-8 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Educational Content</h3>
+              <p className="text-gray-600">
+                Comprehensive lessons from basics to advanced strategies
               </p>
             </div>
 
-            <div className="bg-gray-800 p-8 rounded-xl hover:bg-gray-750 transition-colors">
-              <Target className="h-12 w-12 text-green-500 mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-3">Strategy Builder</h3>
-              <p className="text-gray-400">
-                Learn to create and test complex options strategies with our intuitive builder
+            <div className="text-center p-6">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Target className="h-8 w-8 text-green-600" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Practice Trading</h3>
+              <p className="text-gray-600">
+                Virtual trading with real market data to practice safely
               </p>
             </div>
 
-            <div className="bg-gray-800 p-8 rounded-xl hover:bg-gray-750 transition-colors">
-              <Shield className="h-12 w-12 text-purple-500 mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-3">Risk Management</h3>
-              <p className="text-gray-400">
-                Master risk analysis and portfolio protection techniques
+            <div className="text-center p-6">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Shield className="h-8 w-8 text-purple-600" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Risk Management</h3>
+              <p className="text-gray-600">
+                Learn proper risk management before using real money
               </p>
             </div>
+          </div>
+        </div>
+      </section>
 
-            <div className="bg-gray-800 p-8 rounded-xl hover:bg-gray-750 transition-colors">
-              <BarChart3 className="h-12 w-12 text-yellow-500 mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-3">Performance Tracking</h3>
-              <p className="text-gray-400">
-                Track your learning progress with detailed performance analytics
-              </p>
+      {/* Stats Section */}
+      <section className="py-20 bg-blue-600 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-3 gap-8 text-center">
+            <div>
+              <div className="text-4xl font-bold mb-2">10,000+</div>
+              <div className="text-blue-200">Students Learning</div>
             </div>
-
-            <div className="bg-gray-800 p-8 rounded-xl hover:bg-gray-750 transition-colors">
-              <BookOpen className="h-12 w-12 text-red-500 mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-3">Educational Resources</h3>
-              <p className="text-gray-400">
-                Comprehensive learning materials designed for traders at all levels
-              </p>
+            <div>
+              <div className="text-4xl font-bold mb-2">50+</div>
+              <div className="text-blue-200">Educational Modules</div>
             </div>
-
-            <div className="bg-gray-800 p-8 rounded-xl hover:bg-gray-750 transition-colors">
-              <Users className="h-12 w-12 text-indigo-500 mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-3">Community</h3>
-              <p className="text-gray-400">
-                Learn from other traders and share your trading journey
-              </p>
+            <div>
+              <div className="text-4xl font-bold mb-2">95%</div>
+              <div className="text-blue-200">Success Rate</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Pricing Section */}
-      <section className="py-20 bg-gray-800" id="pricing">
+      <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">
-              Choose Your Plan
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Simple, Transparent Pricing
             </h2>
-            <p className="text-xl text-gray-400 mb-2">
-              Start free, upgrade when you're ready to deepen your knowledge
+            <p className="text-xl text-gray-600">
+              Choose the plan that fits your learning goals
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* Plan Toggle */}
+          <div className="flex justify-center mb-8">
+            <div className="bg-gray-100 p-1 rounded-lg">
+              <button
+                onClick={() => setSelectedPlan('monthly')}
+                className={`px-6 py-2 rounded-md font-medium transition-colors ${
+                  selectedPlan === 'monthly'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setSelectedPlan('yearly')}
+                className={`px-6 py-2 rounded-md font-medium transition-colors ${
+                  selectedPlan === 'yearly'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Yearly
+                <span className="ml-2 bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
+                  Save {YEARLY_SAVINGS_PERCENT}%
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* Pricing Cards */}
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Monthly Plan */}
-            <div className="bg-gray-900 p-8 rounded-xl border border-gray-700">
+            <div className={`bg-white rounded-2xl shadow-lg p-8 border-2 ${
+              selectedPlan === 'monthly' ? 'border-blue-500' : 'border-gray-200'
+            }`}>
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-white mb-2">Monthly</h3>
-                <div className="text-4xl font-bold text-white mb-2">
-                  <span className="text-2xl">$</span>{BASE_PRICES.monthly}
-                  <span className="text-lg text-gray-400">/month</span>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Monthly Plan</h3>
+                <div className="text-4xl font-bold text-gray-900 mb-4">
+                  ${BASE_PRICES.monthly}
+                  <span className="text-lg text-gray-500">/month</span>
                 </div>
-                <p className="text-gray-400">Perfect for learning the basics</p>
+                <p className="text-gray-600">Perfect for getting started</p>
               </div>
 
               <ul className="space-y-4 mb-8">
-                <li className="flex items-center text-gray-300">
+                <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  Educational market data
+                  <span>Educational market data</span>
                 </li>
-                <li className="flex items-center text-gray-300">
+                <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  Basic learning modules
+                  <span>Basic learning modules</span>
                 </li>
-                <li className="flex items-center text-gray-300">
+                <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  5 practice portfolios
+                  <span>5 practice portfolios</span>
                 </li>
-                <li className="flex items-center text-gray-300">
+                <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  Learning support
+                  <span>Email support</span>
                 </li>
               </ul>
 
-              <button 
-                onClick={() => handleSubscribe('monthly')}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors"
+              <StripeCheckout
+                plan="monthly"
+                onSuccess={handleCheckoutSuccess}
+                onError={handleCheckoutError}
+                className="w-full"
+                disabled={selectedPlan !== 'monthly'}
               >
-                Get Started
-              </button>
+                Get Started Monthly
+              </StripeCheckout>
             </div>
 
-            {/* Annual Plan */}
-            <div className="bg-gray-900 p-8 rounded-xl border-2 border-green-500 relative">
+            {/* Yearly Plan */}
+            <div className={`bg-white rounded-2xl shadow-lg p-8 border-2 relative ${
+              selectedPlan === 'yearly' ? 'border-green-500' : 'border-gray-200'
+            }`}>
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <span className="bg-green-500 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                <span className="bg-green-500 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center">
+                  <Star className="h-4 w-4 mr-1" />
                   Best Value
                 </span>
               </div>
 
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-white mb-2">Annual</h3>
-                <div className="mb-2">
-                  <span className="bg-green-500 text-white px-2 py-1 rounded text-sm font-bold">
-                    Save {YEARLY_SAVINGS_PERCENT}%
-                  </span>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Yearly Plan</h3>
+                <div className="text-4xl font-bold text-gray-900 mb-2">
+                  ${Math.round(BASE_PRICES.yearly / 12)}
+                  <span className="text-lg text-gray-500">/month</span>
                 </div>
-                <div className="text-4xl font-bold text-white mb-2">
-                  <span className="text-2xl">$</span>{Math.round(BASE_PRICES.yearly / 12)}
-                  <span className="text-lg text-gray-400">/month</span>
-                </div>
-                <div className="text-sm text-gray-400 mb-2">
+                <div className="text-sm text-gray-600 mb-4">
                   Billed annually at ${BASE_PRICES.yearly}
                 </div>
-                <div className="text-sm text-gray-400 line-through mb-2">
-                  Was ${BASE_PRICES.monthly}/month
-                </div>
-                <p className="text-gray-400">Everything in Monthly + savings</p>
+                <p className="text-gray-600">Best value for committed learners</p>
               </div>
 
               <ul className="space-y-4 mb-8">
-                <li className="flex items-center text-gray-300">
+                <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  Everything in Monthly
+                  <span>Everything in Monthly</span>
                 </li>
-                <li className="flex items-center text-gray-300">
+                <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  2 months free
+                  <span>2 months free</span>
                 </li>
-                <li className="flex items-center text-gray-300">
+                <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  Priority support
+                  <span>Priority support</span>
                 </li>
-                <li className="flex items-center text-gray-300">
+                <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  Early access to features
-                </li>
-              </ul>
-
-              <button 
-                onClick={() => handleSubscribe('yearly')}
-                className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition-colors"
-              >
-                Save with Annual
-              </button>
-            </div>
-
-            {/* Pro Plan */}
-            <div className="bg-gray-900 p-8 rounded-xl border-2 border-blue-500 relative">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <span className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-semibold">
-                  Most Popular
-                </span>
-              </div>
-
-              <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-white mb-2">Pro</h3>
-                <div className="text-4xl font-bold text-white mb-2">
-                  <span className="text-2xl">$</span>{BASE_PRICES.pro}
-                  <span className="text-lg text-gray-400">/month</span>
-                </div>
-                <p className="text-gray-400">For dedicated learners</p>
-              </div>
-
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center text-gray-300">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  Everything in Monthly
-                </li>
-                <li className="flex items-center text-gray-300">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  Advanced learning modules
-                </li>
-                <li className="flex items-center text-gray-300">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  Unlimited practice portfolios
-                </li>
-                <li className="flex items-center text-gray-300">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  Strategy learning tools
-                </li>
-                <li className="flex items-center text-gray-300">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  Priority learning support
+                  <span>Early access to new features</span>
                 </li>
               </ul>
 
-              <button 
-                onClick={() => handleSubscribe('pro')}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors"
+              <StripeCheckout
+                plan="yearly"
+                onSuccess={handleCheckoutSuccess}
+                onError={handleCheckoutError}
+                className="w-full"
+                variant="success"
+                disabled={selectedPlan !== 'yearly'}
               >
-                Upgrade to Pro
-              </button>
-            </div>
-
-            {/* Enterprise Plan */}
-            <div className="bg-gray-900 p-8 rounded-xl border border-gray-700">
-              <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-white mb-2">Enterprise</h3>
-                <div className="text-4xl font-bold text-white mb-2">
-                  <span className="text-2xl">$</span>{BASE_PRICES.enterprise}
-                  <span className="text-lg text-gray-400">/month</span>
-                </div>
-                <p className="text-gray-400">For educational institutions</p>
-              </div>
-
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center text-gray-300">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  Everything in Pro
-                </li>
-                <li className="flex items-center text-gray-300">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  Custom learning paths
-                </li>
-                <li className="flex items-center text-gray-300">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  Dedicated instructor support
-                </li>
-                <li className="flex items-center text-gray-300">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  Educational white-label options
-                </li>
-              </ul>
-
-              <button 
-                onClick={() => handleSubscribe('enterprise')}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors"
-              >
-                Contact Sales
-              </button>
+                Save with Yearly Plan
+              </StripeCheckout>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Newsletter Section */}
-      <section className="py-20 bg-gray-900" id="newsletter">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <Mail className="h-16 w-16 text-blue-500 mx-auto mb-6" />
-          <h2 className="text-3xl font-bold text-white mb-4">
-            Stay Updated
-          </h2>
-          <p className="text-xl text-gray-400 mb-8">
-            Get the latest market insights and trading tips delivered to your inbox
-          </p>
+      {/* Testimonials */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              What Our Students Say
+            </h2>
+          </div>
 
-          {!isSubscribed ? (
-            <>
-              <form onSubmit={handleEmailSubmit} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  className="flex-1 px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:border-blue-500 focus:outline-none"
-                  required
-                />
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50"
-                >
-                  {loading ? 'Subscribing...' : 'Subscribe'}
-                </button>
-              </form>
-              {emailMessage && !isSubscribed && (
-                <div className="mt-4 text-red-400 text-sm">
-                  {emailMessage}
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="flex items-center mb-4">
+                <div className="flex text-yellow-400">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-5 w-5 fill-current" />
+                  ))}
                 </div>
-              )}
-            </>
-          ) : (
-            <div className="text-green-400 text-lg">
-              <CheckCircle className="h-6 w-6 inline mr-2" />
-              {emailMessage || 'Thanks for subscribing!'}
+              </div>
+              <p className="text-gray-600 mb-4">
+                "This platform helped me understand options trading without risking real money. The educational content is top-notch!"
+              </p>
+              <div className="font-semibold">- Sarah J.</div>
             </div>
-          )}
+
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="flex items-center mb-4">
+                <div className="flex text-yellow-400">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-5 w-5 fill-current" />
+                  ))}
+                </div>
+              </div>
+              <p className="text-gray-600 mb-4">
+                "The practice trading feature is incredible. I learned so much before putting real money at risk."
+              </p>
+              <div className="font-semibold">- Mike T.</div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="flex items-center mb-4">
+                <div className="flex text-yellow-400">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-5 w-5 fill-current" />
+                  ))}
+                </div>
+              </div>
+              <p className="text-gray-600 mb-4">
+                "Best investment I've made in my trading education. The risk management lessons alone are worth it."
+              </p>
+              <div className="font-semibold">- Lisa R.</div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Footer Section */}
-      <footer className="bg-black py-12" id="footer">
+      {/* CTA Section */}
+      <section className="py-20 bg-blue-600 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Ready to Start Learning?
+          </h2>
+          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+            Join thousands of students who are mastering options trading safely and effectively.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              to="/app"
+              className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 rounded-lg text-lg font-semibold transition-colors"
+            >
+              Start Free Trial
+            </Link>
+            <Link
+              to="/pricing"
+              className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold transition-colors"
+            >
+              View All Plans
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-white font-semibold mb-4">Learn Options Trading Academy</h3>
+              <h3 className="text-xl font-bold mb-4">Learn Options Trading</h3>
               <p className="text-gray-400">
-                Professional options trading platform for serious traders
+                Master options trading with our comprehensive educational platform.
               </p>
             </div>
-
             <div>
-              <h4 className="text-white font-semibold mb-4">Product</h4>
+              <h4 className="font-semibold mb-4">Platform</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><Link to="/app" className="hover:text-white transition-colors">Features</Link></li>
-                <li><Link to="/app/trading" className="hover:text-white transition-colors">Trading Platform</Link></li>
-                <li><Link to="/app/learning" className="hover:text-white transition-colors">Learning Resources</Link></li>
-                <li><Link to="/app/strategies" className="hover:text-white transition-colors">Strategy Library</Link></li>
+                <li><Link to="/app" className="hover:text-white">Trading Simulator</Link></li>
+                <li><Link to="/pricing" className="hover:text-white">Pricing</Link></li>
+                <li><Link to="/app/lessons" className="hover:text-white">Lessons</Link></li>
               </ul>
             </div>
-
             <div>
-              <h4 className="text-white font-semibold mb-4">Company</h4>
+              <h4 className="font-semibold mb-4">Support</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><Link to="/construction" className="hover:text-white transition-colors">About</Link></li>
-                <li><Link to="/construction" className="hover:text-white transition-colors">Blog</Link></li>
-                <li><Link to="/construction" className="hover:text-white transition-colors">Careers</Link></li>
-                <li><Link to="/construction" className="hover:text-white transition-colors">Contact</Link></li>
+                <li><a href="mailto:support@learnoptionstrading.academy" className="hover:text-white">Contact</a></li>
+                <li><Link to="/help" className="hover:text-white">Help Center</Link></li>
+                <li><Link to="/faq" className="hover:text-white">FAQ</Link></li>
               </ul>
             </div>
-
             <div>
-              <h4 className="text-white font-semibold mb-4">Support</h4>
+              <h4 className="font-semibold mb-4">Legal</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><Link to="/app/community" className="hover:text-white transition-colors">Community</Link></li>
-                <li><Link to="/construction" className="hover:text-white transition-colors">Help Center</Link></li>
-                <li><Link to="/construction" className="hover:text-white transition-colors">Status</Link></li>
-                <li><Link to="/construction" className="hover:text-white transition-colors">Privacy</Link></li>
+                <li><Link to="/privacy" className="hover:text-white">Privacy Policy</Link></li>
+                <li><Link to="/terms" className="hover:text-white">Terms of Service</Link></li>
+                <li><Link to="/disclaimer" className="hover:text-white">Disclaimer</Link></li>
               </ul>
             </div>
           </div>
-
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; {new Date().getFullYear()} Learn Options Trading Academy. All rights reserved.</p>
-            <p className="mt-2 text-sm">
-              <strong>Risk Disclaimer:</strong> Options trading involves substantial risk and is not suitable for all investors. 
-              You may lose all of your invested capital. Past performance is not indicative of future results.
-            </p>
-            <div className="flex justify-center space-x-4 mt-4">
-              <a href="#home" className="text-gray-500 hover:text-white transition-colors">Home</a>
-              <a href="#features" className="text-gray-500 hover:text-white transition-colors">Features</a>
-              <a href="#pricing" className="text-gray-500 hover:text-white transition-colors">Pricing</a>
-            </div>
-            <div className="mt-4">
-              <button onClick={handleTermsButtonClick} className="text-gray-500 hover:text-white transition-colors">
-                Terms and Conditions
-              </button>
-            </div>
+            <p>&copy; 2024 Learn Options Trading Academy. All rights reserved.</p>
           </div>
         </div>
       </footer>
