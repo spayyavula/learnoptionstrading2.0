@@ -26,6 +26,8 @@ export default function StripeCheckout({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  console.log('🔧 StripeCheckout Debug - Plan:', plan, 'RequireTerms:', requireTerms)
+
   const variantStyles = {
     primary: 'bg-blue-600 hover:bg-blue-700 text-white',
     secondary: 'bg-gray-600 hover:bg-gray-700 text-white',
@@ -36,10 +38,8 @@ export default function StripeCheckout({
   const handleCheckout = async () => {
     if (disabled || loading) return
 
-    console.log('🛒 StripeCheckout - handleCheckout called')
-    console.log('📋 Plan:', plan)
-    console.log('🔧 Require Terms:', requireTerms)
-
+    console.log('🛒 StripeCheckout - handleCheckout called for plan:', plan)
+    
     setLoading(true)
     setError(null)
     
@@ -56,12 +56,13 @@ export default function StripeCheckout({
         )
         
         if (!termsAccepted) {
+          console.log('❌ User declined terms')
           setLoading(false)
           return
         }
       }
       
-      console.log('🚀 Calling StripeService.redirectToCheckout...')
+      console.log('🚀 Calling StripeService.redirectToCheckout for plan:', plan)
       
       // This should ONLY use Payment Links or Mock - NO API calls
       await StripeService.redirectToCheckout(plan)

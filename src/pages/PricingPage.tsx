@@ -98,6 +98,7 @@ const PricingPage: React.FC = () => {
               onError={handleCheckoutError}
               className="w-full"
               variant="primary"
+              requireTerms={true}
             >
               Get Started
             </StripeCheckout>
@@ -154,6 +155,7 @@ const PricingPage: React.FC = () => {
               onError={handleCheckoutError}
               className="w-full"
               variant="success"
+              requireTerms={true}
             >
               Save with Annual
             </StripeCheckout>
@@ -205,6 +207,7 @@ const PricingPage: React.FC = () => {
               onError={handleCheckoutError}
               className="w-full"
               variant="primary"
+              requireTerms={true}
             >
               Upgrade to Pro
             </StripeCheckout>
@@ -246,6 +249,7 @@ const PricingPage: React.FC = () => {
               onError={handleCheckoutError}
               className="w-full"
               variant="secondary"
+              requireTerms={true}
             >
               Contact Sales
             </StripeCheckout>
