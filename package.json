@@ -9,16 +9,14 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "build:clean": "rm -rf node_modules/.vite dist .vite && vite build --force",
-    "build:fresh": "npm ci && npm run build:clean",
+    "build": "vite build --force",
+    "build:clean": "vite build --force",
+    "build:windows": "if exist node_modules\\.vite rmdir /s /q node_modules\\.vite && if exist dist rmdir /s /q dist && vite build --force",
     "preview": "vite preview",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "validate": "node -e \"import('./src/utils/validateDeployment.ts').then(m => m.runValidation())\"",
     "deploy:check": "npm run build:clean",
-    "deploy:vercel": "npm run deploy:check && vercel --prod",
     "deploy:netlify": "npm run deploy:check && netlify deploy --prod"
   },
   "dependencies": {
