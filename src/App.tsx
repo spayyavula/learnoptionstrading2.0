@@ -4,7 +4,6 @@ import SeoHelmet from './components/SeoHelmet'
 import ErrorBoundary from './components/ErrorBoundary'
 import Disclaimer from './components/Disclaimer'
 import ErrorDisplay from './components/ErrorDisplay'
-import Layout from './components/Layout'
 import Landing from './pages/Landing'
 import AdminRoute from './components/AdminRoute'
 import { OptionsProvider } from './context/OptionsContext'
@@ -13,6 +12,7 @@ import { OptionsDataProvider } from './context/OptionsDataContext'
 import PricingPage from './pages/PricingPage'
 import SubscriptionPage from './pages/SubscriptionPage'
 import Success from './pages/Success'
+import AppLayout from './components/AppLayout'
 
 // Lazy load page components
 const Dashboard = lazy(() => import('./pages/Dashboard'))
@@ -65,8 +65,8 @@ function App() {
                     <Route path="/success" element={<Success />} />
                     
                     {/* App Routes with nested routing */}
-                    {/* App Routes with nested routing */}
-                    <Route path="/app" element={<Layout children={''} />}>
+                    <Route path="/app" element={<AppLayout />}>
+                      <Route index element={<Dashboard />} />
                       <Route path="dashboard" element={<Dashboard />} />
                       <Route path="agent" element={<AgentDashboard />} />
                       <Route path="demo" element={<Demo />} />
