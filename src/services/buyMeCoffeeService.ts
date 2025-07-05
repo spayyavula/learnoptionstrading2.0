@@ -6,7 +6,7 @@ interface BuyMeCoffeeConfig {
 }
 
 export class BuyMeCoffeeService {
-  // Lazy load environment variables
+  // Get environment variables
   private static getEnvVars() {
     return {
       USERNAME: import.meta.env.VITE_BUY_ME_COFFEE_USERNAME,
@@ -27,29 +27,7 @@ export class BuyMeCoffeeService {
     }
 
     if (!USERNAME) {
-      console.warn('Buy Me a Coffee username not configured, using mock payment')
-      if (typeof confirm !== 'undefined' && confirm('Mock Buy Me a Coffee\n\nAmount: $5\n\nProceed with mock payment?')) {
-        // Store mock payment
-        const mockPayment = {
-          id: `coffee_mock_${Date.now()}`,
-          amount: 5,
-          currency: 'USD',
-          status: 'completed',
-          created: new Date().toISOString(),
-          message: 'Thanks for the coffee! ☕'
-        }
-        
-        localStorage.setItem('mock_coffee_payments', JSON.stringify([
-          ...this.getCoffeePayments(),
-          mockPayment
-        ]))
-        
-        if (typeof alert !== 'undefined') {
-          alert('Thank you for the coffee! ☕ (Development Mode)')
-        }
-        window.location.href = '/'
-      }
-      return
+      throw new Error('Buy Me a Coffee username not configured')
     }
 
     const baseUrl = `https://www.buymeacoffee.com/${USERNAME}`
@@ -123,8 +101,7 @@ export class BuyMeCoffeeService {
     }
 
     if (!USERNAME || !WIDGET_ID) {
-      console.warn('Buy Me a Coffee widget not fully configured')
-      return
+      throw new Error('Buy Me a Coffee widget not fully configured')
     }
 
     try {
@@ -147,56 +124,7 @@ export class BuyMeCoffeeService {
       console.log('Buy Me a Coffee widget loaded')
     } catch (error) {
       console.error('Failed to load Buy Me a Coffee widget:', error)
-    }
-  }
-
-  /**
-   * Mock coffee payment for development
-   */
-  private static mockCoffeePayment(): void {
-    // Check if we're in a browser environment
-    if (typeof window === 'undefined' || typeof confirm === 'undefined') {
-      console.warn('Mock coffee payment called in non-browser environment')
-      return
-    }
-
-    if (confirm('Mock Buy Me a Coffee\n\nAmount: $5\n\nProceed with mock payment?')) {
-      // Store mock payment
-      const mockPayment = {
-        id: `coffee_mock_${Date.now()}`,
-        amount: 5,
-        currency: 'USD',
-        status: 'completed',
-        created: new Date().toISOString(),
-        message: 'Thanks for the coffee! ☕'
-      }
-      
-      localStorage.setItem('mock_coffee_payments', JSON.stringify([
-        ...this.getCoffeePayments(),
-        mockPayment
-      ]))
-      
-      if (typeof alert !== 'undefined') {
-        alert('Thank you for the coffee! ☕ (Development Mode)')
-      }
-      window.location.href = '/'
-    }
-  }
-
-  /**
-   * Get coffee payment history (for development)
-   */
-  static getCoffeePayments(): any[] {
-    // Check if localStorage is available
-    if (typeof localStorage === 'undefined') {
-      return []
-    }
-
-    try {
-      return JSON.parse(localStorage.getItem('mock_coffee_payments') || '[]')
-    } catch (error) {
-      console.error('Error getting coffee payments:', error)
-      return []
+      throw new Error('Failed to load donation widget')
     }
   }
 
@@ -209,7 +137,6 @@ export class BuyMeCoffeeService {
   ): HTMLButtonElement {
     // Check if we're in a browser environment
     if (typeof document === 'undefined') {
-      console.warn('Coffee button creation called in non-browser environment')
       throw new Error('Document not available in non-browser environment')
     }
 

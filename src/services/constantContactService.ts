@@ -20,7 +20,7 @@ interface ConstantContactResponse {
 export class ConstantContactService {
   private static readonly API_BASE_URL = 'https://api.cc.email/v3'
   
-  // Lazy load environment variables
+  // Get environment variables
   private static getEnvVars() {
     return {
       API_KEY: import.meta.env.VITE_CONSTANT_CONTACT_API_KEY,
@@ -42,8 +42,7 @@ export class ConstantContactService {
       
       // Validate environment variables
       if (!API_KEY || !ACCESS_TOKEN || !LIST_ID) {
-        console.warn('Constant Contact not configured, using mock subscription')
-        return this.mockSubscription(email)
+        throw new Error('Email service not properly configured')
       }
 
       const contact: ConstantContactContact = {
@@ -78,7 +77,7 @@ export class ConstantContactService {
           }
         }
 
-        throw new Error(`Constant Contact API error: ${response.status} - ${errorData.message || 'Unknown error'}`)
+        throw new Error(`Subscription failed: ${errorData.message || 'Please try again later'}`)
       }
 
       const data: ConstantContactResponse = await response.json()
@@ -89,51 +88,12 @@ export class ConstantContactService {
         contactId: data.contact_id
       }
     } catch (error) {
-      console.error('Constant Contact subscription error:', error)
-      
-      // Fallback to mock subscription for development
-      if (import.meta.env.DEV) {
-        return this.mockSubscription(email)
-      }
+      console.error('Email subscription error:', error)
       
       return {
         success: false,
-        message: 'Failed to subscribe. Please try again later.'
+        message: error instanceof Error ? error.message : 'Failed to subscribe. Please try again later.'
       }
-    }
-  }
-
-  /**
-   * Mock subscription for development/testing
-   */
-  private static async mockSubscription(email: string): Promise<{ success: boolean; message: string; contactId?: string }> {
-    // Simulate API delay
-    await new Promise(resolve => {
-      try {
-        window.setTimeout(resolve, 1000)
-      } catch (error) {
-        console.error('Error in mock subscription delay:', error)
-        resolve(undefined) // Resolve immediately if setTimeout fails
-      }
-    })
-    
-    // Store in localStorage for development
-    const subscribers = JSON.parse(localStorage.getItem('newsletter_subscribers') || '[]')
-    
-    if (subscribers.includes(email)) {
-      return {
-        success: true,
-        message: 'Email already subscribed to our list!'
-      }
-    }
-    
-    subscribers.push(email)
-    localStorage.setItem('newsletter_subscribers', JSON.stringify(subscribers))
-    
-    return {
-      success: true,
-      message: 'Successfully subscribed to our newsletter! (Development Mode)',
-      contactId: `mock_${Date.now()}`
     }
   }
 
@@ -145,9 +105,7 @@ export class ConstantContactService {
       const { API_KEY, ACCESS_TOKEN } = this.getEnvVars()
       
       if (!API_KEY || !ACCESS_TOKEN) {
-        // Check localStorage in development
-        const subscribers = JSON.parse(localStorage.getItem('newsletter_subscribers') || '[]')
-        return { subscribed: subscribers.includes(email) }
+        throw new Error('Email service not configured')
       }
 
       const response = await fetch(
@@ -161,7 +119,7 @@ export class ConstantContactService {
       )
 
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`)
+        throw new Error(`Failed to check subscription status`)
       }
 
       const data = await response.json()
@@ -184,16 +142,8 @@ export class ConstantContactService {
     try {
       const { API_KEY, ACCESS_TOKEN, LIST_ID } = this.getEnvVars()
       
-      if (!API_KEY || !ACCESS_TOKEN) {
-        // Remove from localStorage in development
-        const subscribers = JSON.parse(localStorage.getItem('newsletter_subscribers') || '[]')
-        const filtered = subscribers.filter((sub: string) => sub !== email)
-        localStorage.setItem('newsletter_subscribers', JSON.stringify(filtered))
-        
-        return {
-          success: true,
-          message: 'Successfully unsubscribed! (Development Mode)'
-        }
+      if (!API_KEY || !ACCESS_TOKEN || !LIST_ID) {
+        throw new Error('Email service not configured')
       }
 
       // First, get the contact ID
@@ -218,7 +168,7 @@ export class ConstantContactService {
       )
 
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`)
+        throw new Error('Failed to unsubscribe')
       }
 
       return {
@@ -229,7 +179,7 @@ export class ConstantContactService {
       console.error('Unsubscribe error:', error)
       return {
         success: false,
-        message: 'Failed to unsubscribe. Please try again later.'
+        message: error instanceof Error ? error.message : 'Failed to unsubscribe. Please try again later.'
       }
     }
   }
