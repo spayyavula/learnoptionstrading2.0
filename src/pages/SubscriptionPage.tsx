@@ -3,7 +3,7 @@ import { CheckCircle, CreditCard, Settings, ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { StripeService } from '../services/stripeService'
 import { BASE_PRICES } from '../utils/priceSync'
-import StripeCheckoutButton from '../components/StripeCheckoutButton'
+import StripeCheckout from '../components/StripeCheckout'
 
 export default function SubscriptionPage() {
   const [subscriptionStatus, setSubscriptionStatus] = useState<any>(null)
@@ -38,6 +38,19 @@ export default function SubscriptionPage() {
       console.error('Failed to open customer portal:', error)
       alert('Unable to open subscription management. Please contact support.')
     }
+  }
+
+  const handleCheckoutSuccess = () => {
+    console.log('✅ Checkout completed successfully')
+    // Refresh subscription status after successful checkout
+    setTimeout(() => {
+      checkSubscriptionStatus()
+    }, 1000)
+  }
+
+  const handleCheckoutError = (error: string) => {
+    console.error('❌ Checkout error:', error)
+    alert(`Checkout Error: ${error}`)
   }
 
   if (loading) {
@@ -116,82 +129,177 @@ export default function SubscriptionPage() {
           ) : (
             <div className="text-center py-8">
               <p className="text-gray-600 mb-6">You don't have an active subscription.</p>
-              <Link 
-                to="/pricing"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors inline-flex items-center"
-              >
-                <CreditCard className="h-4 w-4 mr-2" />
-                View Pricing Plans
-              </Link>
+              <p className="text-gray-500 mb-6">Choose a plan below to get started:</p>
             </div>
           )}
         </div>
 
-        {/* Available Plans */}
-        {!subscriptionStatus?.active && (
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Available Plans</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* Monthly Plan */}
-              <div className="border border-gray-200 rounded-lg p-4">
+        {/* Available Plans - Always show, even if user has subscription */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">
+            {subscriptionStatus?.active ? 'Upgrade or Change Plan' : 'Choose Your Plan'}
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Monthly Plan */}
+            <div className="border border-gray-200 rounded-lg p-6 hover:border-blue-300 transition-colors">
+              <div className="text-center mb-6">
                 <h3 className="font-semibold text-lg text-gray-900 mb-2">Monthly</h3>
                 <p className="text-3xl font-bold text-gray-900 mb-2">
                   ${BASE_PRICES.monthly}
                   <span className="text-base text-gray-500">/month</span>
                 </p>
-                <p className="text-gray-600 text-sm mb-4">Perfect for getting started</p>
-                <StripeCheckoutButton plan="monthly" className="w-full">
-                  Subscribe Monthly
-                </StripeCheckoutButton>
+                <p className="text-gray-600 text-sm">Perfect for getting started</p>
               </div>
+              
+              <ul className="space-y-2 mb-6 text-sm text-gray-600">
+                <li className="flex items-center">
+                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                  Educational market data
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                  Basic learning modules
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                  5 practice portfolios
+                </li>
+              </ul>
+              
+              <StripeCheckout
+                plan="monthly"
+                onSuccess={handleCheckoutSuccess}
+                onError={handleCheckoutError}
+                className="w-full"
+                disabled={subscriptionStatus?.plan === 'monthly'}
+              >
+                {subscriptionStatus?.plan === 'monthly' ? 'Current Plan' : 'Subscribe Monthly'}
+              </StripeCheckout>
+            </div>
 
-              {/* Yearly Plan */}
-              <div className="border-2 border-green-500 rounded-lg p-4 relative">
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">
-                    Best Value
-                  </span>
-                </div>
+            {/* Yearly Plan */}
+            <div className="border-2 border-green-500 rounded-lg p-6 relative bg-green-50">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">
+                  Best Value
+                </span>
+              </div>
+              
+              <div className="text-center mb-6">
                 <h3 className="font-semibold text-lg text-gray-900 mb-2">Yearly</h3>
                 <p className="text-3xl font-bold text-gray-900 mb-2">
                   ${Math.round(BASE_PRICES.yearly / 12)}
                   <span className="text-base text-gray-500">/month</span>
                 </p>
-                <p className="text-gray-600 text-sm mb-4">Billed annually (${BASE_PRICES.yearly})</p>
-                <StripeCheckoutButton plan="yearly" variant="success" className="w-full">
-                  Subscribe Yearly
-                </StripeCheckoutButton>
+                <p className="text-sm text-gray-600 mb-2">
+                  Billed annually at ${BASE_PRICES.yearly}
+                </p>
+                <p className="text-gray-600 text-sm">Save 2 months!</p>
               </div>
+              
+              <ul className="space-y-2 mb-6 text-sm text-gray-600">
+                <li className="flex items-center">
+                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                  Everything in Monthly
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                  2 months free
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                  Priority support
+                </li>
+              </ul>
+              
+              <StripeCheckout
+                plan="yearly"
+                onSuccess={handleCheckoutSuccess}
+                onError={handleCheckoutError}
+                className="w-full"
+                variant="success"
+                disabled={subscriptionStatus?.plan === 'yearly'}
+              >
+                {subscriptionStatus?.plan === 'yearly' ? 'Current Plan' : 'Subscribe Yearly'}
+              </StripeCheckout>
+            </div>
 
-              {/* Pro Plan */}
-              <div className="border border-gray-200 rounded-lg p-4">
+            {/* Pro Plan */}
+            <div className="border border-gray-200 rounded-lg p-6 hover:border-blue-300 transition-colors">
+              <div className="text-center mb-6">
                 <h3 className="font-semibold text-lg text-gray-900 mb-2">Pro</h3>
                 <p className="text-3xl font-bold text-gray-900 mb-2">
                   ${BASE_PRICES.pro}
                   <span className="text-base text-gray-500">/month</span>
                 </p>
-                <p className="text-gray-600 text-sm mb-4">Advanced features included</p>
-                <StripeCheckoutButton plan="pro" className="w-full">
-                  Subscribe Pro
-                </StripeCheckoutButton>
+                <p className="text-gray-600 text-sm">Advanced features</p>
               </div>
+              
+              <ul className="space-y-2 mb-6 text-sm text-gray-600">
+                <li className="flex items-center">
+                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                  Everything in Monthly
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                  Advanced modules
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                  Unlimited portfolios
+                </li>
+              </ul>
+              
+              <StripeCheckout
+                plan="pro"
+                onSuccess={handleCheckoutSuccess}
+                onError={handleCheckoutError}
+                className="w-full"
+                disabled={subscriptionStatus?.plan === 'pro'}
+              >
+                {subscriptionStatus?.plan === 'pro' ? 'Current Plan' : 'Subscribe Pro'}
+              </StripeCheckout>
+            </div>
 
-              {/* Enterprise Plan */}
-              <div className="border border-gray-200 rounded-lg p-4">
+            {/* Enterprise Plan */}
+            <div className="border border-gray-200 rounded-lg p-6 hover:border-blue-300 transition-colors">
+              <div className="text-center mb-6">
                 <h3 className="font-semibold text-lg text-gray-900 mb-2">Enterprise</h3>
                 <p className="text-3xl font-bold text-gray-900 mb-2">
                   ${BASE_PRICES.enterprise}
                   <span className="text-base text-gray-500">/month</span>
                 </p>
-                <p className="text-gray-600 text-sm mb-4">For teams and institutions</p>
-                <StripeCheckoutButton plan="enterprise" className="w-full">
-                  Subscribe Enterprise
-                </StripeCheckoutButton>
+                <p className="text-gray-600 text-sm">For institutions</p>
               </div>
+              
+              <ul className="space-y-2 mb-6 text-sm text-gray-600">
+                <li className="flex items-center">
+                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                  Everything in Pro
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                  Custom learning paths
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                  Dedicated support
+                </li>
+              </ul>
+              
+              <StripeCheckout
+                plan="enterprise"
+                onSuccess={handleCheckoutSuccess}
+                onError={handleCheckoutError}
+                className="w-full"
+                disabled={subscriptionStatus?.plan === 'enterprise'}
+              >
+                {subscriptionStatus?.plan === 'enterprise' ? 'Current Plan' : 'Subscribe Enterprise'}
+              </StripeCheckout>
             </div>
           </div>
-        )}
+        </div>
 
         {/* Support */}
         <div className="text-center mt-8">

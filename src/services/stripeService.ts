@@ -72,6 +72,10 @@ export class StripeService {
   static async redirectToCheckout(
     plan: 'monthly' | 'yearly' | 'pro' | 'enterprise'
   ): Promise<void> {
+    console.log('🛒 StripeService.redirectToCheckout called with plan:', plan)
+    console.log('🔍 Current URL:', window.location.href)
+    console.log('🔍 Environment mode:', import.meta.env.MODE)
+    
     console.log('🛒 Starting checkout process:', { plan })
     
     const { 
