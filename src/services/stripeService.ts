@@ -1,21 +1,14 @@
 import { BASE_PRICES } from '../utils/priceSync'
 import { JsonDebugger } from '../utils/jsonDebugger'
 
-// Add utility function for safe JSON parsing with enhanced debugging
-function safeJsonParse(jsonString: string, fallback: any = null, context: string = 'StripeService') {
-  return JsonDebugger.safeParse(jsonString, context) ?? fallback
-}
-
-// Add utility function for safe localStorage operations
+// Utility functions for safe localStorage operations
 function safeLocalStorageGet(key: string, fallback: any = null) {
   try {
     const item = localStorage.getItem(key)
     if (!item) return fallback
-    return safeJsonParse(item, fallback, `localStorage.get(${key})`)
+    return JsonDebugger.safeParse(item, `localStorage.get(${key})`) ?? fallback
   } catch (error) {
     console.error(`❌ LocalStorage get failed for key "${key}":`, error)
-    JsonDebugger.logJsonOperation('LOCALSTORAGE_GET_ERROR', { key, error: error instanceof Error ? error.message : 'Unknown' }, 'localStorage')
-    // Clear corrupted data
     try {
       localStorage.removeItem(key)
     } catch (clearError) {
@@ -33,22 +26,11 @@ function safeLocalStorageSet(key: string, value: any) {
       return false
     }
     localStorage.setItem(key, jsonString)
-    JsonDebugger.logJsonOperation('LOCALSTORAGE_SET_SUCCESS', { key, value }, 'localStorage')
     return true
   } catch (error) {
     console.error(`❌ LocalStorage set failed for key "${key}":`, error)
-    JsonDebugger.logJsonOperation('LOCALSTORAGE_SET_ERROR', { key, error: error instanceof Error ? error.message : 'Unknown' }, 'localStorage')
     return false
   }
-}
-
-interface StripeCheckoutOptions {
-  priceId: string
-  successUrl?: string
-  cancelUrl?: string
-  customerEmail?: string
-  metadata?: Record<string, string>
-  couponCode?: string
 }
 
 interface StripeProduct {
@@ -62,64 +44,30 @@ interface StripeProduct {
 }
 
 export class StripeService {
-  // Lazy load environment variables
+  // Get environment variables
   private static getEnvVars() {
     const envVars = {
       PUBLISHABLE_KEY: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '',
-      PRICE_ID_BASIC: import.meta.env.VITE_STRIPE_PRICE_ID_BASIC || '',
-      PRICE_ID_PRO: import.meta.env.VITE_STRIPE_PRICE_ID_PRO || '',
-      PRICE_ID_ENTERPRISE: import.meta.env.VITE_STRIPE_PRICE_ID_ENTERPRISE || '',
-      MONTHLY_PRICE_ID: import.meta.env.VITE_STRIPE_MONTHLY_PRICE_ID || '',
-      YEARLY_PRICE_ID: import.meta.env.VITE_STRIPE_YEARLY_PRICE_ID || '',
-      COFFEE_PRICE_ID: import.meta.env.VITE_STRIPE_COFFEE_PRICE_ID || '',
-      // Payment Links
+      // Payment Links from environment
       MONTHLY_PAYMENT_LINK: import.meta.env.VITE_STRIPE_MONTHLY_PAYMENT_LINK || '',
       YEARLY_PAYMENT_LINK: import.meta.env.VITE_STRIPE_YEARLY_PAYMENT_LINK || '',
       PRO_PAYMENT_LINK: import.meta.env.VITE_STRIPE_PRO_PAYMENT_LINK || '',
       ENTERPRISE_PAYMENT_LINK: import.meta.env.VITE_STRIPE_ENTERPRISE_PAYMENT_LINK || ''
     }
     
-    console.log('🔧 Stripe Environment Variables Debug:', {
+    console.log('🔧 Stripe Environment Variables:', {
       DEV_MODE: import.meta.env.DEV,
       MODE: import.meta.env.MODE,
-      PUBLISHABLE_KEY_LENGTH: envVars.PUBLISHABLE_KEY.length,
-      PUBLISHABLE_KEY_PREFIX: envVars.PUBLISHABLE_KEY.substring(0, 8) || 'EMPTY',
-      HAS_PAYMENT_LINKS: !!(envVars.MONTHLY_PAYMENT_LINK && envVars.YEARLY_PAYMENT_LINK)
+      PUBLISHABLE_KEY_SET: !!envVars.PUBLISHABLE_KEY,
+      PAYMENT_LINKS_SET: !!(envVars.MONTHLY_PAYMENT_LINK && envVars.YEARLY_PAYMENT_LINK)
     })
     
     return envVars
   }
 
   /**
-   * Initialize Stripe (loads Stripe.js)
-   */
-  static async initializeStripe() {
-    const { PUBLISHABLE_KEY } = this.getEnvVars()
-    
-    if (!PUBLISHABLE_KEY) {
-      console.warn('Stripe not configured')
-      return null
-    }
-
-    try {
-      console.log('🔄 Loading Stripe.js...')
-      const { loadStripe } = await import('@stripe/stripe-js')
-      const stripe = await loadStripe(PUBLISHABLE_KEY)
-      
-      if (!stripe) {
-        throw new Error('Stripe failed to initialize - returned null')
-      }
-      
-      console.log('✅ Stripe.js loaded successfully')
-      return stripe
-    } catch (error) {
-      console.error('❌ Failed to load Stripe:', error)
-      return null
-    }
-  }
-
-  /**
-   * Redirect to Stripe Checkout using Payment Links
+   * Redirect to Stripe Checkout using Payment Links ONLY
+   * No backend API calls - purely client-side
    */
   static async redirectToCheckout(
     plan: 'monthly' | 'yearly' | 'pro' | 'enterprise'
@@ -135,15 +83,15 @@ export class StripeService {
     } = this.getEnvVars()
     
     try {
-      // Force mock checkout in development mode
+      // Use mock checkout in development mode OR if no Stripe keys
       if (import.meta.env.DEV || !PUBLISHABLE_KEY) {
-        console.log('🧪 Development mode or missing keys - Using mock checkout')
+        console.log('🧪 Development mode - Using mock checkout')
         await this.mockStripeCheckoutAsync(plan)
         return
       }
       
-      // Use Payment Links for production
-      console.log('💳 Using Stripe Payment Links...')
+      // Production: Use Payment Links
+      console.log('💳 Production mode - Using Stripe Payment Links')
       
       const paymentLinks = {
         monthly: MONTHLY_PAYMENT_LINK,
@@ -153,13 +101,14 @@ export class StripeService {
       }
       
       const paymentLink = paymentLinks[plan]
+      
       if (!paymentLink) {
-        throw new Error(`Payment link not configured for plan: ${plan}`)
+        throw new Error(`❌ Payment link not configured for plan: ${plan}. Please contact support.`)
       }
       
-      console.log('🚀 Redirecting to Stripe Payment Link:', paymentLink)
+      console.log('🚀 Redirecting to Stripe Payment Link:', plan)
       
-      // Redirect to Payment Link
+      // Direct redirect to Payment Link - NO API CALLS
       window.location.href = paymentLink
       
     } catch (error) {
@@ -172,7 +121,7 @@ export class StripeService {
         return
       }
       
-      throw new Error(`Failed to redirect to checkout: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(`Checkout failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
@@ -202,7 +151,7 @@ export class StripeService {
       {
         id: 'pro',
         name: 'Pro',
-        description: 'Full access with advanced analytics and strategy testing',
+        description: 'Full access with advanced analytics',
         price: BASE_PRICES.pro,
         currency: 'USD',
         interval: 'month',
@@ -211,7 +160,7 @@ export class StripeService {
       {
         id: 'enterprise',
         name: 'Enterprise',
-        description: 'Everything in Pro plus team features and API access',
+        description: 'Everything in Pro plus team features',
         price: BASE_PRICES.enterprise,
         currency: 'USD',
         interval: 'month',
@@ -221,10 +170,10 @@ export class StripeService {
   }
 
   /**
-   * Async wrapper for mock checkout
+   * Mock checkout for development
    */
   private static async mockStripeCheckoutAsync(plan: 'monthly' | 'yearly' | 'pro' | 'enterprise'): Promise<void> {
-    console.log('🧪 Mock checkout (async) initiated:', { plan })
+    console.log('🧪 Mock checkout initiated:', { plan })
     
     return new Promise((resolve, reject) => {
       try {
@@ -237,9 +186,10 @@ export class StripeService {
         }
         
         const userConfirmed = confirm(
-          `Mock Stripe Checkout\n\n` +
+          `🧪 MOCK STRIPE CHECKOUT (Development Mode)\n\n` +
           `Plan: ${product.name}\n` +
           `Price: $${product.price}/${product.interval}\n\n` +
+          `In production, this will redirect to Stripe.\n\n` +
           `Proceed with mock subscription?`
         )
         
@@ -256,19 +206,20 @@ export class StripeService {
   }
 
   /**
-   * Complete mock checkout process
+   * Complete mock checkout
    */
   private static completeMockCheckout(plan: 'monthly' | 'yearly' | 'pro' | 'enterprise', finalPrice: number): void {
     console.log('✅ Completing mock checkout:', { plan, finalPrice })
     
     const mockSubscription = {
-      id: `sub_mock_${Date.now().toString()}`,
+      id: `sub_mock_${Date.now()}`,
       plan,
       status: 'active',
       created: new Date().toISOString(),
       current_period_end: new Date(Date.now() + (plan === 'yearly' ? 365 : 30) * 24 * 60 * 60 * 1000).toISOString(),
       amount_paid: finalPrice,
-      customer_id: `cus_mock_${Date.now().toString()}`
+      customer_id: `cus_mock_${Date.now()}`,
+      terms_accepted: true
     }
     
     const success = safeLocalStorageSet('mock_subscription', mockSubscription)
@@ -281,28 +232,29 @@ export class StripeService {
   }
 
   /**
-   * Create customer portal session
+   * Customer portal for development
    */
   static async createCustomerPortalSession(customerId: string): Promise<string> {
-    console.log('🏪 Creating customer portal session for:', customerId)
+    console.log('🏪 Customer portal request for:', customerId)
     
     if (import.meta.env.DEV) {
       const userChoice = confirm(
         `🧪 MOCK CUSTOMER PORTAL (Development Mode)\n\n` +
         `Customer ID: ${customerId}\n\n` +
-        `In production, this opens Stripe's customer portal.\n\n` +
+        `In production, this opens Stripe's billing portal.\n\n` +
         `Simulate opening portal?`
       )
       
       if (userChoice) {
+        // Open a mock portal URL
         return `https://billing.stripe.com/p/session/mock_${customerId}_${Date.now()}`
       } else {
         throw new Error('Customer portal access cancelled')
       }
     }
     
-    // In production, this should call your backend
-    throw new Error('Customer portal requires backend integration')
+    // In production, this would need a backend API
+    throw new Error('Customer portal requires backend integration in production')
   }
 
   /**
