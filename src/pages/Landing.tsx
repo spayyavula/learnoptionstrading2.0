@@ -636,6 +636,8 @@ export default function Landing() {
       </section>
 
       {/* Support Section */}
+
+      {/* Support Section 
       <section className="py-20 bg-gray-800" id="support">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <Coffee className="h-16 w-16 text-yellow-500 mx-auto mb-6" />
@@ -671,8 +673,11 @@ export default function Landing() {
           </div>
         </div>
       </section>
+      */}
 
-      {/* Footer */}
+      {/* Community Section */}
+
+      
       <footer className="bg-black py-12" id="footer">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
@@ -712,7 +717,8 @@ export default function Landing() {
                 <li><Link to="/construction" className="hover:text-white transition-colors">Privacy</Link></li>
               </ul>
             </div>
-          </div>
+          </div> */
+     
 
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
             <p>&copy; {new Date().getFullYear()} Learn Options Trading Academy. All rights reserved.</p>
@@ -729,6 +735,12 @@ export default function Landing() {
           </div>
         </div>
       </footer>
+      
+
+      {/* Terms and Conditions Button */}
+      <button onClick={handleTermsButtonClick} className="text-gray-500 hover:text-white transition-colors">
+        Terms and Conditions
+      </button>
 
       {/* Terms and Conditions Modal */}
       {showTermsModal && (
