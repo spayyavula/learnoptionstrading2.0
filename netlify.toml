@@ -1,84 +1,106 @@
 # Netlify configuration for Learn Options Trading App
 [build]
-  # Linux-compatible build command
-  command = "npm ci && npm run build"
-  
-  # Output directory
+  # Simple, reliable build command
+  command = "npm install && npm run build"
   publish = "dist"
-  
-  # Functions directory (if you add serverless functions later)
-  functions = "netlify/functions"
 
 [build.environment]
-  # Node version (use LTS)
+  # Use Node 20 for best compatibility with Vite 5+
   NODE_VERSION = "20"
   NPM_VERSION = "10"
-  
-  # Disable telemetry for faster builds
   CI = "true"
+  # Disable npm audit for faster builds
+  NPM_CONFIG_AUDIT = "false"
+  # Disable package-lock generation during build
+  NPM_CONFIG_PACKAGE_LOCK = "false"
 
-# Cache settings - cache node_modules but not Vite cache
+# Build optimization
+[build.processing]
+  skip_processing = false
+
+[build.processing.css]
+  bundle = true
+  minify = true
+
+[build.processing.js]
+  bundle = true
+  minify = true
+
+# Cache node_modules but allow fresh installs when needed
 [build.cache]
   paths = ["node_modules"]
 
-# Redirects for SPA routing
+# SPA routing - redirect all paths to index.html
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+  conditions = {Role = [], Country = []}
 
-# API redirects (for future backend integration)
+# Future API routes (if you add serverless functions)
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
 
-# Security headers
+# Security and performance headers
 [[headers]]
   for = "/*"
   [headers.values]
-    # Security headers
+    # Security
     X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     
-    # Cache control for static assets
-    Cache-Control = "public, max-age=31536000"
+    # Performance - cache static assets
+    Cache-Control = "public, max-age=31536000, immutable"
 
+# Don't cache HTML files
 [[headers]]
   for = "*.html"
   [headers.values]
-    # Don't cache HTML files
     Cache-Control = "public, max-age=0, must-revalidate"
 
+# Don't cache service worker
 [[headers]]
   for = "/sw.js"
   [headers.values]
-    # Don't cache service worker
     Cache-Control = "public, max-age=0, must-revalidate"
 
-# Environment-specific builds
+# CSS files - long cache with immutable
+[[headers]]
+  for = "*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# JS files - long cache with immutable
+[[headers]]
+  for = "*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Production context
 [context.production]
   command = "npm ci && npm run build"
   environment = { NODE_ENV = "production" }
 
+# Deploy previews
 [context.deploy-preview]
   command = "npm install && npm run build"
   environment = { NODE_ENV = "development" }
 
+# Branch deploys
 [context.branch-deploy]
-  command = "rm -rf node_modules/.vite && npm install && npm run build"
+  command = "npm install && npm run build"
+  environment = { NODE_ENV = "development" }
 
-# Functions settings (for future serverless functions)
+# Functions configuration (for future use)
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
+  external_node_modules = ["@supabase/supabase-js", "date-fns"]
 
-# Dev server settings
-[dev]
-  command = "npm run dev"
-  port = 5173
-  targetPort = 5173
-  publish = "dist"
-  autoLaunch = false
+# Form handling (if you add contact forms later)
+[form]
+  settings = { external = false }
