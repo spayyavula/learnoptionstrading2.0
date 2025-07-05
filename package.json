@@ -21,8 +21,6 @@
     "deploy:netlify": "npm run deploy:check && netlify deploy --prod"
   },
   "dependencies": {
-    "@stripe/react-stripe-js": "^2.1.0",
-    "@stripe/stripe-js": "^2.1.0",
     "@supabase/supabase-js": "^2.38.0",
     "axios": "^1.6.0",
     "clsx": "^2.0.0",
@@ -33,8 +31,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.8.1",
-    "recharts": "^2.8.0",
-    "stripe": "^12.18.0"
+    "recharts": "^2.8.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.40.0",

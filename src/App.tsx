@@ -8,27 +8,12 @@ import Layout from './components/Layout'
 import Landing from './pages/Landing'
 import AdminRoute from './components/AdminRoute'
 import { OptionsProvider } from './context/OptionsContext'
-import { Elements } from '@stripe/react-stripe-js'
-import { loadStripe } from '@stripe/stripe-js'
 import { TradingProvider } from './context/TradingContext'
 import { OptionsDataProvider } from './context/OptionsDataContext'
 import PricingPage from './pages/PricingPage'
 import SubscriptionPage from './pages/SubscriptionPage'
 import Success from './pages/Success'
 import AppLayout from './components/AppLayout'
-
-// Initialize Stripe conditionally - only if publishable key is available
-const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || ''
-const stripePromise = publishableKey ? loadStripe(publishableKey) : Promise.resolve(null)
-
-// Log Stripe initialization status
-if (import.meta.env.DEV) {
-  if (publishableKey) {
-    console.log('🔧 Stripe initialized globally with key:', publishableKey.substring(0, 8) + '...')
-  } else {
-    console.log('🔧 Stripe NOT initialized - no publishable key (using mock mode)')
-  }
-}
 
 // Lazy load page components
 const Dashboard = lazy(() => import('./pages/Dashboard'))
@@ -48,13 +33,8 @@ const Community = lazy(() => import('./pages/Community'))
 const Settings = lazy(() => import('./pages/Settings'))
 const OptionsDataManager = lazy(() => import('./pages/OptionsDataManager'))
 const Construction = lazy(() => import('./pages/Construction'))
-const SubscriptionPageLazy = lazy(() => import('./pages/SubscriptionPage'))
-const PricingPageLazy = lazy(() => import('./pages/PricingPage'))
-const SuccessPage = lazy(() => import('./pages/SuccessPage'))
-const CancelPage = lazy(() => import('./pages/CancelPage'))
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
 const UserProfile = lazy(() => import('./pages/UserProfile'))
-const Success = lazy(() => import('./pages/Success')) // Import Success page
 
 // Loading component for Suspense
 const LoadingFallback = () => (
@@ -65,41 +45,66 @@ const LoadingFallback = () => (
     </div>
   </div>
 )
+
 function App() {
   return (
     <TradingProvider>
-      <Elements stripe={stripePromise}>
-        <ErrorBoundary>
-          <SeoHelmet />
-          <Disclaimer variant="banner" />
-          {import.meta.env.DEV && <ErrorDisplay />}
-          <OptionsProvider>
-            <OptionsDataProvider>
-              <Router>
-                <div className="App">
-                  <Suspense fallback={<LoadingFallback />}>
-                    <Routes>
-                      {/* Public Routes */}
-                      <Route path="/" element={<Landing />} />
-                      <Route path="/pricing" element={<PricingPage />} />
-                      <Route path="/subscription" element={<SubscriptionPage />} />
-                      <Route path="/success" element={<Success />} />
+      <ErrorBoundary>
+        <SeoHelmet />
+        <Disclaimer variant="banner" />
+        {import.meta.env.DEV && <ErrorDisplay />}
+        <OptionsProvider>
+          <OptionsDataProvider>
+            <Router>
+              <div className="App">
+                <Suspense fallback={<LoadingFallback />}>
+                  <Routes>
+                    {/* Public Routes */}
+                    <Route path="/" element={<Landing />} />
+                    <Route path="/pricing" element={<PricingPage />} />
+                    <Route path="/subscription" element={<SubscriptionPage />} />
+                    <Route path="/success" element={<Success />} />
+                    
+                    {/* App Routes with nested routing */}
+                    <Route path="/app" element={<AppLayout />}>
+                      <Route index element={<Dashboard />} />
+                      <Route path="dashboard" element={<Dashboard />} />
+                      <Route path="agent" element={<AgentDashboard />} />
+                      <Route path="demo" element={<Demo />} />
+                      <Route path="portfolio" element={<OptionsPortfolio />} />
+                      <Route path="trading" element={<OptionsTrading />} />
+                      <Route path="orders" element={<Orders />} />
+                      <Route path="chain" element={<OptionsChain />} />
+                      <Route path="regime" element={<RegimeAnalysis />} />
+                      <Route path="analytics" element={<Analytics />} />
+                      <Route path="arbitrage" element={<OptionsArbitrage />} />
+                      <Route path="learning" element={<OptionsLearning />} />
+                      <Route path="journal" element={<TradingJournal />} />
+                      <Route path="strategies" element={<OptionsStrategies />} />
+                      <Route path="community" element={<Community />} />
+                      <Route path="settings" element={<Settings />} />
+                      <Route path="data" element={<OptionsDataManager />} />
+                      <Route path="construction" element={<Construction />} />
+                      <Route path="subscription" element={<SubscriptionPage />} />
+                      <Route path="profile" element={<UserProfile />} />
                       
-                      {/* App Routes */}
-                      <Route path="/app" element={<AppLayout />}>
-                        {/* Add your app sub-routes here */}
-                      </Route>
-                      
-                      {/* Catch-all redirect */}
-                      <Route path="*" element={<Navigate to="/" replace />} />
-                    </Routes>
-                  </Suspense>
-                </div>
-              </Router>
-            </OptionsDataProvider>
-          </OptionsProvider>
-        </ErrorBoundary>
-      </Elements>
+                      {/* Admin Routes */}
+                      <Route path="admin" element={
+                        <AdminRoute>
+                          <AdminDashboard />
+                        </AdminRoute>
+                      } />
+                    </Route>
+                    
+                    {/* Catch-all redirect */}
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </Suspense>
+              </div>
+            </Router>
+          </OptionsDataProvider>
+        </OptionsProvider>
+      </ErrorBoundary>
     </TradingProvider>
   )
 }
