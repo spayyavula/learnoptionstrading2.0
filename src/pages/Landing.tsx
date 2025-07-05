@@ -21,6 +21,10 @@ import { BASE_PRICES, YEARLY_SAVINGS_PERCENT } from '../utils/priceSync'
 import TermsAgreement from '../components/TermsAgreement'
 import StripeCheckout from '../components/StripeCheckout'
 
+console.log('🔍 Landing.tsx - BASE_PRICES Debug:', BASE_PRICES)
+console.log('🔍 Landing.tsx - Yearly calculation:', Math.round(BASE_PRICES.yearly / 12))
+console.log('🔍 Landing.tsx - YEARLY_SAVINGS_PERCENT:', YEARLY_SAVINGS_PERCENT)
+
 export default function Landing() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
@@ -277,7 +281,7 @@ export default function Landing() {
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Monthly Plan</h3>
                 <div className="text-4xl font-bold text-gray-900 mb-4">
-                  ${BASE_PRICES.monthly}
+                  ${BASE_PRICES?.monthly || 29}
                   <span className="text-lg text-gray-500">/month</span>
                 </div>
                 <p className="text-gray-600">Perfect for getting started</p>
@@ -327,11 +331,11 @@ export default function Landing() {
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Yearly Plan</h3>
                 <div className="text-4xl font-bold text-gray-900 mb-2">
-                  ${Math.round(BASE_PRICES.yearly / 12)}
+                  ${Math.round((BASE_PRICES?.yearly || 290) / 12)}
                   <span className="text-lg text-gray-500">/month</span>
                 </div>
                 <div className="text-sm text-gray-600 mb-4">
-                  Billed annually at ${BASE_PRICES.yearly}
+                  Billed annually at ${BASE_PRICES?.yearly || 290}
                 </div>
                 <p className="text-gray-600">Best value for committed learners</p>
               </div>

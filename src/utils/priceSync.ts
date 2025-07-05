@@ -8,14 +8,14 @@
 // Base prices for all subscription plans
 export const BASE_PRICES = {
   monthly: 29,
-  yearly: 290, 
-  enterprise: 199,  // Updated to match Stripe
-  pro: 79
+  yearly: 290,
+  pro: 49,
+  enterprise: 199
 };
 
 // Calculate yearly savings percentage
 export const YEARLY_SAVINGS_PERCENT = Math.round(
-  ((BASE_PRICES.monthly * 12 - BASE_PRICES.yearly) / (BASE_PRICES.monthly * 12)) * 100
+  ((BASE_PRICES.monthly * 12) - BASE_PRICES.yearly) / (BASE_PRICES.monthly * 12) * 100
 );
 
 /**
@@ -108,3 +108,7 @@ export function getPlanDetails(planId: 'monthly' | 'yearly' | 'enterprise' | 'pr
     ]
   };
 }
+
+// Add debug logging
+console.log('🔍 priceSync.ts - BASE_PRICES:', BASE_PRICES);
+console.log('🔍 priceSync.ts - YEARLY_SAVINGS_PERCENT:', YEARLY_SAVINGS_PERCENT);

@@ -5,6 +5,12 @@ import { StripeService } from '../services/stripeService'
 import { BASE_PRICES } from '../utils/priceSync'
 import StripeCheckout from '../components/StripeCheckout'
 
+console.log('🔍 SubscriptionPage.tsx - BASE_PRICES Debug:', BASE_PRICES)
+console.log('🔍 SubscriptionPage.tsx - Monthly:', BASE_PRICES.monthly)
+console.log('🔍 SubscriptionPage.tsx - Yearly:', BASE_PRICES.yearly)
+console.log('🔍 SubscriptionPage.tsx - Pro:', BASE_PRICES.pro)
+console.log('🔍 SubscriptionPage.tsx - Enterprise:', BASE_PRICES.enterprise)
+
 export default function SubscriptionPage() {
   const [subscriptionStatus, setSubscriptionStatus] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -146,7 +152,7 @@ export default function SubscriptionPage() {
               <div className="text-center mb-6">
                 <h3 className="font-semibold text-lg text-gray-900 mb-2">Monthly</h3>
                 <p className="text-3xl font-bold text-gray-900 mb-2">
-                  ${BASE_PRICES.monthly}
+                  ${BASE_PRICES?.monthly || 29}
                   <span className="text-base text-gray-500">/month</span>
                 </p>
                 <p className="text-gray-600 text-sm">Perfect for getting started</p>
@@ -189,11 +195,11 @@ export default function SubscriptionPage() {
               <div className="text-center mb-6">
                 <h3 className="font-semibold text-lg text-gray-900 mb-2">Yearly</h3>
                 <p className="text-3xl font-bold text-gray-900 mb-2">
-                  ${Math.round(BASE_PRICES.yearly / 12)}
+                  ${Math.round((BASE_PRICES?.yearly || 290) / 12)}
                   <span className="text-base text-gray-500">/month</span>
                 </p>
                 <p className="text-sm text-gray-600 mb-2">
-                  Billed annually at ${BASE_PRICES.yearly}
+                  Billed annually at ${BASE_PRICES?.yearly || 290}
                 </p>
                 <p className="text-gray-600 text-sm">Save 2 months!</p>
               </div>
@@ -230,7 +236,7 @@ export default function SubscriptionPage() {
               <div className="text-center mb-6">
                 <h3 className="font-semibold text-lg text-gray-900 mb-2">Pro</h3>
                 <p className="text-3xl font-bold text-gray-900 mb-2">
-                  ${BASE_PRICES.pro}
+                  ${BASE_PRICES?.pro || 49}
                   <span className="text-base text-gray-500">/month</span>
                 </p>
                 <p className="text-gray-600 text-sm">Advanced features</p>
@@ -267,7 +273,7 @@ export default function SubscriptionPage() {
               <div className="text-center mb-6">
                 <h3 className="font-semibold text-lg text-gray-900 mb-2">Enterprise</h3>
                 <p className="text-3xl font-bold text-gray-900 mb-2">
-                  ${BASE_PRICES.enterprise}
+                  ${BASE_PRICES?.enterprise || 199}
                   <span className="text-base text-gray-500">/month</span>
                 </p>
                 <p className="text-gray-600 text-sm">For institutions</p>
