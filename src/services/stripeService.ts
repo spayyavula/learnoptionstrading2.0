@@ -166,12 +166,9 @@ export class StripeService {
    * Redirect to Stripe Checkout for subscription
    */
   static async redirectToCheckout(
-    plan: 'monthly' | 'yearly' | 'enterprise' | 'pro', 
-    customerEmail?: string,
-    couponCode?: string,
-    isDeal: boolean = false
+    plan: 'monthly' | 'yearly' | 'pro' | 'enterprise'
   ): Promise<void> {
-    console.log('🛒 Starting checkout process:', { plan, customerEmail, couponCode, isDeal })
+    console.log('🛒 Starting checkout process:', { plan })
     
     const { 
       MONTHLY_PRICE_ID, 
@@ -218,7 +215,7 @@ export class StripeService {
         console.log('💡 To test real Stripe in dev, set NODE_ENV=production')
         
         try {
-          await this.mockStripeCheckoutAsync(plan, couponCode, isDeal)
+          await this.mockStripeCheckoutAsync(plan)
           return
         } catch (mockError) {
           console.error('❌ Mock checkout failed:', mockError)
@@ -231,7 +228,7 @@ export class StripeService {
         console.log('🧪 Missing Stripe configuration - Using mock checkout')
         
         try {
-          await this.mockStripeCheckoutAsync(plan, couponCode, isDeal)
+          await this.mockStripeCheckoutAsync(plan)
           return
         } catch (mockError) {
           console.error('❌ Mock checkout failed:', mockError)
@@ -246,16 +243,15 @@ export class StripeService {
       }
 
       // Choose success URL based on whether it's a deal or regular subscription
-      const successUrl = isDeal 
-        ? `${window.location.origin}/subscribe?subscription=success&plan=${plan}${couponCode ? `&coupon=${couponCode}` : ''}&deal=true`
-        : `${window.location.origin}/success?plan=${plan}${couponCode ? `&coupon=${couponCode}` : ''}`
+      const successUrl = `${window.location.origin}/success?plan=${plan}`
+      const cancelUrl = `${window.location.origin}/pricing`
 
       console.log('🚀 Redirecting to Stripe with config:', {
         priceId,
         successUrl,
-        cancelUrl: `${window.location.origin}/cancel`,
-        customerEmail,
-        couponCode
+        cancelUrl,
+        customerEmail: undefined,
+        couponCode: undefined
       })
 
       const { error } = await stripe.redirectToCheckout({
@@ -265,9 +261,9 @@ export class StripeService {
         }],
         mode: 'subscription',
         successUrl,
-        cancelUrl: `${window.location.origin}/cancel`,
-        customerEmail,
-        ...(couponCode && { discounts: [{ coupon: couponCode }] })
+        cancelUrl,
+        ...(undefined && { customerEmail: undefined }),
+        ...(undefined && { discounts: [{ coupon: undefined }] })
       })
 
       if (error) {
@@ -284,7 +280,7 @@ export class StripeService {
       if (import.meta.env.DEV) {
         console.log('🧪 Falling back to mock checkout due to error')
         try {
-          await this.mockStripeCheckoutAsync(plan, couponCode, isDeal)
+          await this.mockStripeCheckoutAsync(plan)
           return
         } catch (fallbackError) {
           console.error('❌ Fallback mock checkout also failed:', fallbackError)

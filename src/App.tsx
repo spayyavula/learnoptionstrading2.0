@@ -50,6 +50,7 @@ const SuccessPage = lazy(() => import('./pages/SuccessPage'))
 const CancelPage = lazy(() => import('./pages/CancelPage'))
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
 const UserProfile = lazy(() => import('./pages/UserProfile'))
+const Success = lazy(() => import('./pages/Success')) // Import Success page
 
 // Loading component for Suspense
 const LoadingFallback = () => (
@@ -78,7 +79,7 @@ function App() {
                   <Route path="/agent" element={<AgentDashboard />} />
                   <Route path="/subscribe" element={<SubscriptionPage />} />
                   <Route path="/pricing" element={<PricingPage />} />
-                  <Route path="/success" element={<SuccessPage />} />
+                  <Route path="/success" element={<Success />} /> {/* Add Success route */}
                   <Route path="/cancel" element={<CancelPage />} />
                   {/* Standalone trading route for direct access */}
                   <Route path="/trading" element={
