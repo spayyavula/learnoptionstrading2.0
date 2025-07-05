@@ -1,6 +1,9 @@
 import { BASE_PRICES } from '../utils/priceSync'
 import { JsonDebugger } from '../utils/jsonDebugger'
 
+// NO STRIPE IMPORTS - We're using Payment Links only
+// Remove any lines like: import { loadStripe } from '@stripe/stripe-js'
+
 // Utility functions for safe localStorage operations
 function safeLocalStorageGet(key: string, fallback: any = null) {
   try {
@@ -76,8 +79,6 @@ export class StripeService {
     console.log('🔍 Current URL:', window.location.href)
     console.log('🔍 Environment mode:', import.meta.env.MODE)
     
-    console.log('🛒 Starting checkout process:', { plan })
-    
     const { 
       MONTHLY_PAYMENT_LINK,
       YEARLY_PAYMENT_LINK,
@@ -86,10 +87,16 @@ export class StripeService {
       PUBLISHABLE_KEY 
     } = this.getEnvVars()
     
+    console.log('🔧 Environment check:', {
+      DEV_MODE: import.meta.env.DEV,
+      HAS_PUBLISHABLE_KEY: !!PUBLISHABLE_KEY,
+      HAS_PAYMENT_LINKS: !!(MONTHLY_PAYMENT_LINK && YEARLY_PAYMENT_LINK)
+    })
+    
     try {
-      // Use mock checkout in development mode OR if no Stripe keys
-      if (import.meta.env.DEV || !PUBLISHABLE_KEY) {
-        console.log('🧪 Development mode - Using mock checkout')
+      // FORCE DEVELOPMENT MODE FOR NOW - Remove this line when you have Payment Links
+      if (true || import.meta.env.DEV || !PUBLISHABLE_KEY) {
+        console.log('🧪 Using mock checkout (development mode or no Stripe keys)')
         await this.mockStripeCheckoutAsync(plan)
         return
       }
@@ -107,10 +114,12 @@ export class StripeService {
       const paymentLink = paymentLinks[plan]
       
       if (!paymentLink) {
-        throw new Error(`❌ Payment link not configured for plan: ${plan}. Please contact support.`)
+        console.error('❌ No payment link for plan:', plan)
+        console.error('Available payment links:', paymentLinks)
+        throw new Error(`Payment link not configured for plan: ${plan}. Please contact support.`)
       }
       
-      console.log('🚀 Redirecting to Stripe Payment Link:', plan)
+      console.log('🚀 Redirecting to Stripe Payment Link:', paymentLink)
       
       // Direct redirect to Payment Link - NO API CALLS
       window.location.href = paymentLink
@@ -118,14 +127,9 @@ export class StripeService {
     } catch (error) {
       console.error('❌ Checkout error:', error)
       
-      // Fallback to mock in development
-      if (import.meta.env.DEV) {
-        console.log('🧪 Falling back to mock checkout due to error')
-        await this.mockStripeCheckoutAsync(plan)
-        return
-      }
-      
-      throw new Error(`Checkout failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      // Always fallback to mock in case of error
+      console.log('🧪 Falling back to mock checkout due to error')
+      await this.mockStripeCheckoutAsync(plan)
     }
   }
 

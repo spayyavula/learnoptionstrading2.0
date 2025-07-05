@@ -34,26 +34,29 @@ export default function StripeCheckout({
   const handleCheckout = async () => {
     if (disabled || loading) return
 
+    console.log('🛒 StripeCheckout component - handleCheckout called')
+    console.log('📋 Plan:', plan)
+    console.log('🌍 Current URL:', window.location.href)
+
     setLoading(true)
     setError(null)
     
     try {
-      console.log('🛒 Starting Stripe checkout for plan:', plan)
+      console.log('🚀 Calling StripeService.redirectToCheckout...')
       
-      // Use StripeService to redirect to checkout
+      // Use StripeService - this should only use Payment Links, no API calls
       await StripeService.redirectToCheckout(plan)
+      
+      console.log('✅ StripeService.redirectToCheckout completed')
       
       // If we reach here (shouldn't happen with redirect), call success
       onSuccess?.()
       
     } catch (error) {
-      console.error('❌ Checkout failed:', error)
+      console.error('❌ StripeCheckout error:', error)
       const errorMessage = error instanceof Error ? error.message : 'Checkout failed'
       setError(errorMessage)
       onError?.(errorMessage)
-      
-      // Show user-friendly error
-      alert(`Checkout Error\n\n${errorMessage}\n\nPlease try again or contact support if the problem persists.`)
     } finally {
       setLoading(false)
     }
