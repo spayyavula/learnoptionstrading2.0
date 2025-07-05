@@ -10,8 +10,6 @@ import {
   Play,
   BarChart3,
   Target,
-  Award,
-  Coffee,
   Mail,
   Tag
 } from 'lucide-react'
@@ -20,7 +18,6 @@ import { ConstantContactService } from '../services/constantContactService'
 import { StripeService } from '../services/stripeService'
 import { BASE_PRICES } from '../utils/priceSync'
 import { useState, useEffect } from 'react'
-import { BuyMeCoffeeService } from '../services/buyMeCoffeeService'
 import { YEARLY_SAVINGS_PERCENT } from '../utils/priceSync'
 import { CouponService } from '../services/couponService'
 import DealsSection from '../components/DealsSection'
@@ -98,15 +95,6 @@ export default function Landing() {
       setEmailMessage('Failed to subscribe. Please try again later.')
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleDonate = async (amount: number) => {
-    try {
-      await BuyMeCoffeeService.openBuyMeCoffeePage(`Thank you for supporting us with $${amount}!`)
-    } catch (error) {
-      console.error('Failed to process donation:', error)
-      window.alert('Sorry, there was an error processing your donation. Please try again.')
     }
   }
 
@@ -635,49 +623,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Support Section */}
-
-      {/* Support Section 
-      <section className="py-20 bg-gray-800" id="support">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <Coffee className="h-16 w-16 text-yellow-500 mx-auto mb-6" />
-          <h2 className="text-3xl font-bold text-white mb-4">
-            Support Our Work
-          </h2>
-          <p className="text-xl text-gray-400 mb-4">
-            Help us continue building amazing trading tools
-          </p>
-
-          <div className="flex flex-wrap justify-center gap-4">
-            <button
-              onClick={() => handleDonate(5)}
-              className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center hover:transform hover:scale-105"
-            >
-              <Coffee className="mr-2 h-5 w-5" />
-              Buy us a coffee - $5
-            </button>
-            <button
-              onClick={() => handleDonate(10)}
-              className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center hover:transform hover:scale-105"
-            >
-              <Coffee className="mr-2 h-5 w-5" />
-              Support us - $10
-            </button>
-            <button
-              onClick={() => handleDonate(25)}
-              className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center hover:transform hover:scale-105"
-            >
-              <Award className="mr-2 h-5 w-5" />
-              Sponsor us - $25
-            </button>
-          </div>
-        </div>
-      </section>
-      */}
-
-      {/* Community Section */}
-
-      
+      {/* Footer Section */}
       <footer className="bg-black py-12" id="footer">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
@@ -717,8 +663,7 @@ export default function Landing() {
                 <li><Link to="/construction" className="hover:text-white transition-colors">Privacy</Link></li>
               </ul>
             </div>
-          </div> */
-     
+          </div>
 
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
             <p>&copy; {new Date().getFullYear()} Learn Options Trading Academy. All rights reserved.</p>
@@ -730,12 +675,10 @@ export default function Landing() {
               <a href="#home" className="text-gray-500 hover:text-white transition-colors">Home</a>
               <a href="#features" className="text-gray-500 hover:text-white transition-colors">Features</a>
               <a href="#pricing" className="text-gray-500 hover:text-white transition-colors">Pricing</a>
-              <a href="#support" className="text-gray-500 hover:text-white transition-colors">Support</a>
             </div>
           </div>
         </div>
       </footer>
-      
 
       {/* Terms and Conditions Button */}
       <button onClick={handleTermsButtonClick} className="text-gray-500 hover:text-white transition-colors">
