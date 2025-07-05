@@ -4,7 +4,7 @@ import { StripeService } from '../services/stripeService'
 import { CouponService } from '../services/couponService'
 import CouponInput from './CouponInput'
 import TermsAgreement from './TermsAgreement'
-import { CheckCircle, CreditCard, ShieldCheck, AlertTriangle } from 'lucide-react'
+import { CheckCircle, CreditCard, ShieldCheck, AlertTriangle, Loader2 } from 'lucide-react'
 import { formatPrice, BASE_PRICES } from '../utils/priceSync'
 
 type PlanType = 'monthly' | 'yearly' | 'enterprise' | 'pro'
@@ -192,7 +192,7 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
       >
         {loading ? (
           <>
-            <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             Processing...
           </>
         ) : (
