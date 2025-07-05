@@ -116,29 +116,11 @@ const Disclaimer: React.FC<DisclaimerProps> = ({
   
   // Default banner variant
   return (
-    <div className={`bg-yellow-50 border-t border-b border-yellow-200 py-3 ${className}`}>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <AlertTriangle className="h-5 w-5 text-yellow-600" />
-            </div>
-            <div className="ml-3">
-              <p className="text-sm text-yellow-700">
-                <strong>Disclaimer:</strong> Learn Options Trading Academy is for educational purposes only. Not financial advice. Trading involves risk.
-              </p>
-            </div>
-          </div>
-          
-          {showCloseButton && (
-            <button 
-              onClick={handleDismiss}
-              className="ml-auto flex-shrink-0 text-yellow-600 hover:text-yellow-800"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          )}
-        </div>
+    <div className="fixed top-0 left-0 right-0 z-50 bg-yellow-50 border-b border-yellow-200 px-4 py-2">
+      <div className="max-w-7xl mx-auto">
+        <p className="text-sm text-yellow-800 text-center">
+          <strong>Educational Purpose Only:</strong> This platform is for learning options trading with virtual money only. Not real financial advice.
+        </p>
       </div>
     </div>
   )

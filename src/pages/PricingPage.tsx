@@ -31,13 +31,12 @@ const PricingPage: React.FC = () => {
   };
 
   const handleCheckoutSuccess = () => {
-    console.log('✅ Checkout completed successfully');
-    // Could add analytics tracking here
+    console.log('✅ Checkout completed successfully from Pricing page');
   };
 
   const handleCheckoutError = (error: string) => {
-    console.error('❌ Checkout error:', error);
-    // Could add error analytics here
+    console.error('❌ Checkout error from Pricing page:', error);
+    alert(`Checkout Error: ${error}\n\nPlease try again or contact support.`);
   };
 
   return (
