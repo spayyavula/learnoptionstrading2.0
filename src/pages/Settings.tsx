@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import { Save, RefreshCw, Download, Upload, AlertTriangle, Database, Activity, Tag, Plus, Trash2, CreditCard } from 'lucide-react'
+import { Save, RefreshCw, Download, Upload, AlertTriangle, Database, Activity, CreditCard } from 'lucide-react'
 import { useTradingContext } from '../context/TradingContext'
-import { CouponService } from '../services/couponService'
 import { StripeService } from '../services/stripeService'
+import { ConstantContactService } from '../services/constantContactService'
 import PageViewCounter from './PageViewCounter'
 import SubscriptionStatus from '../components/SubscriptionStatus'
 
@@ -10,31 +10,21 @@ export default function Settings() {
   const { state } = useTradingContext()
   const [storageStats, setStorageStats] = useState<any>(null)
   const [loadingStats, setLoadingStats] = useState(false)
-  const [showCouponManager, setShowCouponManager] = useState(false)
-  const [coupons, setCoupons] = useState<any[]>([])
-  const [newCoupon, setNewCoupon] = useState({
-    code: '',
-    name: '',
-    description: '',
-    type: 'percentage' as 'percentage' | 'fixed_amount',
-    value: 0,
-    validUntil: '',
-    usageLimit: 100,
-    applicablePlans: [] as string[],
-    isFirstTimeOnly: false
-  })
+  
   const [notifications, setNotifications] = useState({
     orderFills: true,
     priceAlerts: true,
     dailySummary: false,
     marketNews: true
   })
+  
   const [riskSettings, setRiskSettings] = useState({
     maxPositionSize: 10000,
     maxDailyLoss: 5000,
     stopLossPercent: 10,
     takeProfitPercent: 20
   })
+  
   const [displaySettings, setDisplaySettings] = useState({
     theme: 'light',
     currency: 'USD',
@@ -42,51 +32,11 @@ export default function Settings() {
     chartType: 'candlestick'
   })
 
-  React.useEffect(() => {
-    if (showCouponManager) {
-      setCoupons(CouponService.getCoupons())
-    }
-  }, [showCouponManager])
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
     }).format(amount)
-  }
-  const handleCreateCoupon = () => {
-    if (!newCoupon.code || !newCoupon.name || !newCoupon.validUntil) {
-      alert('Please fill in all required fields')
-      return
-    }
-
-    try {
-      const couponData = {
-        ...newCoupon,
-        validFrom: new Date(),
-        validUntil: new Date(newCoupon.validUntil),
-        isActive: true
-      }
-      
-      CouponService.createCoupon(couponData)
-      setCoupons(CouponService.getCoupons())
-      
-      // Reset form
-      setNewCoupon({
-        code: '',
-        name: '',
-        description: '',
-        type: 'percentage',
-        value: 0,
-        validUntil: '',
-        usageLimit: 100,
-        applicablePlans: [],
-        isFirstTimeOnly: false
-      })
-      
-      alert('Coupon created successfully!')
-    } catch (error) {
-      alert('Failed to create coupon. Please try again.')
-    }
   }
 
   const handleResetAccount = () => {
@@ -266,170 +216,6 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* Coupon Management */}
-      <div className="card">
-        <div className="card-header">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium text-gray-900 flex items-center">
-              <Tag className="h-5 w-5 mr-2" />
-              Coupon Management
-            </h3>
-            <button
-              onClick={() => setShowCouponManager(!showCouponManager)}
-              className="btn btn-secondary"
-            >
-              {showCouponManager ? 'Hide' : 'Show'} Coupons
-            </button>
-          </div>
-        </div>
-        {showCouponManager && (
-          <div className="card-body">
-            {/* Create New Coupon */}
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-              <h4 className="font-medium text-gray-900 mb-4">Create New Coupon</h4>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <div>
-                  <label className="form-label">Coupon Code *</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={newCoupon.code}
-                    onChange={(e) => setNewCoupon({...newCoupon, code: e.target.value.toUpperCase()})}
-                    placeholder="SAVE20"
-                  />
-                </div>
-                <div>
-                  <label className="form-label">Name *</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={newCoupon.name}
-                    onChange={(e) => setNewCoupon({...newCoupon, name: e.target.value})}
-                    placeholder="Save 20% Deal"
-                  />
-                </div>
-                <div>
-                  <label className="form-label">Description</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={newCoupon.description}
-                    onChange={(e) => setNewCoupon({...newCoupon, description: e.target.value})}
-                    placeholder="20% off your subscription"
-                  />
-                </div>
-                <div>
-                  <label className="form-label">Type</label>
-                  <select
-                    className="form-select"
-                    value={newCoupon.type}
-                    onChange={(e) => setNewCoupon({...newCoupon, type: e.target.value as 'percentage' | 'fixed_amount'})}
-                  >
-                    <option value="percentage">Percentage</option>
-                    <option value="fixed_amount">Fixed Amount</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="form-label">Value</label>
-                  <input
-                    type="number"
-                    className="form-input"
-                    value={newCoupon.value}
-                    onChange={(e) => setNewCoupon({...newCoupon, value: parseFloat(e.target.value)})}
-                    placeholder={newCoupon.type === 'percentage' ? '20' : '10'}
-                  />
-                </div>
-                <div>
-                  <label className="form-label">Valid Until *</label>
-                  <input
-                    type="date"
-                    className="form-input"
-                    value={newCoupon.validUntil}
-                    onChange={(e) => setNewCoupon({...newCoupon, validUntil: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <label className="form-label">Usage Limit</label>
-                  <input
-                    type="number"
-                    className="form-input"
-                    value={newCoupon.usageLimit}
-                    onChange={(e) => setNewCoupon({...newCoupon, usageLimit: parseInt(e.target.value)})}
-                  />
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="firstTimeOnly"
-                    checked={newCoupon.isFirstTimeOnly}
-                    onChange={(e) => setNewCoupon({...newCoupon, isFirstTimeOnly: e.target.checked})}
-                    className="h-4 w-4 text-blue-600 rounded"
-                  />
-                  <label htmlFor="firstTimeOnly" className="ml-2 text-sm text-gray-700">
-                    First-time customers only
-                  </label>
-                </div>
-              </div>
-              <button
-                onClick={handleCreateCoupon}
-                className="mt-4 btn btn-primary"
-              >
-                <Plus className="h-4 w-4" />
-                Create Coupon
-              </button>
-            </div>
-
-            {/* Existing Coupons */}
-            <div>
-              <h4 className="font-medium text-gray-900 mb-4">Existing Coupons</h4>
-              {coupons.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">No coupons created yet</p>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th>Code</th>
-                        <th>Name</th>
-                        <th>Type</th>
-                        <th>Value</th>
-                        <th>Used/Limit</th>
-                        <th>Valid Until</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {coupons.map((coupon) => (
-                        <tr key={coupon.id}>
-                          <td className="font-medium">{coupon.code}</td>
-                          <td>{coupon.name}</td>
-                          <td className="capitalize">{coupon.type.replace('_', ' ')}</td>
-                          <td>
-                            {coupon.type === 'percentage' ? `${coupon.value}%` : `$${coupon.value}`}
-                          </td>
-                          <td>
-                            {coupon.usedCount}/{coupon.usageLimit || '∞'}
-                          </td>
-                          <td>{new Date(coupon.validUntil).toLocaleDateString()}</td>
-                          <td>
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              coupon.isActive && new Date() <= new Date(coupon.validUntil)
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-red-100 text-red-800'
-                            }`}>
-                              {coupon.isActive && new Date() <= new Date(coupon.validUntil) ? 'Active' : 'Inactive'}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Notification Settings */}
         <div className="card">
@@ -577,7 +363,6 @@ export default function Settings() {
               >
                 <option value="USD">USD ($)</option>
                 <option value="EUR">EUR (€)</option>
-                
                 <option value="GBP">GBP (£)</option>
                 <option value="JPY">JPY (¥)</option>
               </select>
