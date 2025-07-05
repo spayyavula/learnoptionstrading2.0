@@ -1,1 +1,1 @@
-export const BUILD_TIMESTAMP = Date.now() 
+"export const BUILD_ID = $(date +%s)" 

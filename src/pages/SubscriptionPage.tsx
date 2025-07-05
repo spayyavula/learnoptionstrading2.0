@@ -1,322 +1,403 @@
-import React, { useState, useEffect } from 'react'
-import { CheckCircle, CreditCard, Settings, ArrowLeft } from 'lucide-react'
+/* CACHE BUST: ${Date.now()} */
+import React, { useState } from 'react'
+import { CheckCircle, ArrowLeft, Star } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { StripeService } from '../services/stripeService'
-import { BASE_PRICES } from '../utils/priceSync'
+import { BASE_PRICES, YEARLY_SAVINGS_PERCENT } from '../utils/priceSync'
 import StripeCheckout from '../components/StripeCheckout'
+import TermsAgreement from '../components/TermsAgreement'
 
-console.log('🔍 SubscriptionPage.tsx - BASE_PRICES Debug:', BASE_PRICES)
-console.log('🔍 SubscriptionPage.tsx - Monthly:', BASE_PRICES.monthly)
-console.log('🔍 SubscriptionPage.tsx - Yearly:', BASE_PRICES.yearly)
-console.log('🔍 SubscriptionPage.tsx - Pro:', BASE_PRICES.pro)
-console.log('🔍 SubscriptionPage.tsx - Enterprise:', BASE_PRICES.enterprise)
+// Force cache invalidation
+const CACHE_BUST_ID = Date.now()
+console.log('🔧 PricingPage Cache Bust:', CACHE_BUST_ID)
 
-export default function SubscriptionPage() {
-  const [subscriptionStatus, setSubscriptionStatus] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+const PricingPage: React.FC = () => {
+  const [showTermsModal, setShowTermsModal] = useState(false)
+  const [pendingSubscription, setPendingSubscription] = useState<{
+    plan: 'monthly' | 'yearly' | 'pro' | 'enterprise'
+  } | null>(null)
 
-  useEffect(() => {
-    checkSubscriptionStatus()
-  }, [])
+  const handleSubscribe = async (plan: 'monthly' | 'yearly' | 'pro' | 'enterprise') => {
+    // Show terms agreement before proceeding
+    setPendingSubscription({ plan })
+    setShowTermsModal(true)
+  }
 
-  const checkSubscriptionStatus = () => {
-    setLoading(true)
-    try {
-      const status = StripeService.getSubscriptionStatus()
-      setSubscriptionStatus(status)
-    } catch (error) {
-      console.error('Failed to check subscription status:', error)
-    } finally {
-      setLoading(false)
+  const handleTermsAccepted = () => {
+    setShowTermsModal(false)
+    if (pendingSubscription) {
+      // The StripeCheckout component will handle the actual checkout
+      setPendingSubscription(null)
     }
   }
 
-  const handleManageSubscription = async () => {
-    if (!subscriptionStatus?.subscription?.customer_id) {
-      alert('Unable to access subscription management. Please contact support.')
-      return
-    }
-
-    try {
-      const portalUrl = await StripeService.createCustomerPortalSession(subscriptionStatus.subscription.customer_id)
-      window.open(portalUrl, '_blank')
-    } catch (error) {
-      console.error('Failed to open customer portal:', error)
-      alert('Unable to open subscription management. Please contact support.')
-    }
+  const handleTermsDeclined = () => {
+    setShowTermsModal(false)
+    setPendingSubscription(null)
   }
 
   const handleCheckoutSuccess = () => {
-    console.log('✅ Checkout completed successfully')
-    // Refresh subscription status after successful checkout
-    setTimeout(() => {
-      checkSubscriptionStatus()
-    }, 1000)
+    console.log('✅ Checkout completed successfully from Pricing page')
   }
 
   const handleCheckoutError = (error: string) => {
-    console.error('❌ Checkout error:', error)
-    alert(`Checkout Error: ${error}`)
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading subscription status...</p>
-        </div>
-      </div>
-    )
+    console.error('❌ Checkout error from Pricing page:', error)
+    alert(`Checkout Error: ${error}\n\nPlease try again or contact support.`)
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <Link 
-            to="/app" 
-            className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            Back to App
-          </Link>
-          <h1 className="text-3xl font-bold text-gray-900">Subscription Management</h1>
-          <p className="text-gray-600 mt-2">Manage your Learn Options Trading Academy subscription</p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900">
+      {/* Header */}
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <Link 
+          to="/" 
+          className="inline-flex items-center text-white hover:text-gray-300 mb-8 transition-colors"
+        >
+          <ArrowLeft className="h-5 w-5 mr-2" />
+          Back to Home
+        </Link>
+
+        <div className="text-center mb-16">
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+            Choose Your Plan
+          </h1>
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+            Start your options trading journey with the plan that fits your needs
+          </p>
         </div>
 
-        {/* Current Subscription Status */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Current Status</h2>
-          
-          {subscriptionStatus?.active ? (
-            <div className="space-y-4">
-              <div className="flex items-center text-green-600">
-                <CheckCircle className="h-5 w-5 mr-2" />
-                <span className="font-medium">Active Subscription</span>
+        {/* Pricing Cards */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+          {/* Monthly Plan */}
+          <div className="bg-gray-800 rounded-2xl p-8 border border-gray-700">
+            <div className="text-center mb-8">
+              <h3 className="text-2xl font-bold text-white mb-2">Monthly</h3>
+              <div className="text-4xl font-bold text-white mb-2">
+                <span className="text-2xl">$</span>{BASE_PRICES.monthly}
+                <span className="text-lg text-gray-400">/month</span>
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-gray-500">Plan:</span>
-                  <span className="ml-2 font-medium capitalize">{subscriptionStatus.plan}</span>
-                </div>
-                <div>
-                  <span className="text-gray-500">Status:</span>
-                  <span className="ml-2 font-medium text-green-600">Active</span>
-                </div>
-                {subscriptionStatus.subscription?.current_period_end && (
-                  <div>
-                    <span className="text-gray-500">Next billing:</span>
-                    <span className="ml-2 font-medium">
-                      {new Date(subscriptionStatus.subscription.current_period_end).toLocaleDateString()}
-                    </span>
-                  </div>
-                )}
-                {subscriptionStatus.subscription?.amount_paid && (
-                  <div>
-                    <span className="text-gray-500">Amount:</span>
-                    <span className="ml-2 font-medium">${subscriptionStatus.subscription.amount_paid}</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="pt-4 border-t">
-                <button
-                  onClick={handleManageSubscription}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center"
-                >
-                  <Settings className="h-4 w-4 mr-2" />
-                  Manage Subscription
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-gray-600 mb-6">You don't have an active subscription.</p>
-              <p className="text-gray-500 mb-6">Choose a plan below to get started:</p>
-            </div>
-          )}
-        </div>
-
-        {/* Available Plans - Always show, even if user has subscription */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">
-            {subscriptionStatus?.active ? 'Upgrade or Change Plan' : 'Choose Your Plan'}
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Monthly Plan */}
-            <div className="border border-gray-200 rounded-lg p-6 hover:border-blue-300 transition-colors">
-              <div className="text-center mb-6">
-                <h3 className="font-semibold text-lg text-gray-900 mb-2">Monthly</h3>
-                <p className="text-3xl font-bold text-gray-900 mb-2">
-                  ${BASE_PRICES?.monthly || 29}
-                  <span className="text-base text-gray-500">/month</span>
-                </p>
-                <p className="text-gray-600 text-sm">Perfect for getting started</p>
-              </div>
-              
-              <ul className="space-y-2 mb-6 text-sm text-gray-600">
-                <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                  Educational market data
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                  Basic learning modules
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                  5 practice portfolios
-                </li>
-              </ul>
-              
-              <StripeCheckout
-                plan="monthly"
-                onSuccess={handleCheckoutSuccess}
-                onError={handleCheckoutError}
-                className="w-full"
-                disabled={subscriptionStatus?.plan === 'monthly'}
-              >
-                {subscriptionStatus?.plan === 'monthly' ? 'Current Plan' : 'Subscribe Monthly'}
-              </StripeCheckout>
+              <p className="text-gray-400">Perfect for getting started</p>
             </div>
 
-            {/* Yearly Plan */}
-            <div className="border-2 border-green-500 rounded-lg p-6 relative bg-green-50">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">
-                  Best Value
+            <ul className="space-y-4 mb-8">
+              <li className="flex items-center text-gray-300">
+                <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                Educational market data
+              </li>
+              <li className="flex items-center text-gray-300">
+                <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                Basic learning modules
+              </li>
+              <li className="flex items-center text-gray-300">
+                <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                5 practice portfolios
+              </li>
+              <li className="flex items-center text-gray-300">
+                <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                Learning support
+              </li>
+            </ul>
+
+            <StripeCheckout
+              plan="monthly"
+              onSuccess={handleCheckoutSuccess}
+              onError={handleCheckoutError}
+              className="w-full"
+              variant="primary"
+              requireTerms={true}
+            >
+              Get Started
+            </StripeCheckout>
+          </div>
+
+          {/* Annual Plan */}
+          <div className="bg-gray-800 rounded-2xl p-8 border-2 border-green-500 relative">
+            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+              <span className="bg-green-500 text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center">
+                <Star className="h-4 w-4 mr-1" />
+                Best Value
+              </span>
+            </div>
+
+            <div className="text-center mb-8">
+              <h3 className="text-2xl font-bold text-white mb-2">Annual</h3>
+              <div className="mb-2">
+                <span className="bg-green-500 text-white px-3 py-1 rounded text-sm font-bold">
+                  Save {YEARLY_SAVINGS_PERCENT}%
                 </span>
               </div>
-              
-              <div className="text-center mb-6">
-                <h3 className="font-semibold text-lg text-gray-900 mb-2">Yearly</h3>
-                <p className="text-3xl font-bold text-gray-900 mb-2">
-                  ${Math.round((BASE_PRICES?.yearly || 290) / 12)}
-                  <span className="text-base text-gray-500">/month</span>
-                </p>
-                <p className="text-sm text-gray-600 mb-2">
-                  Billed annually at ${BASE_PRICES?.yearly || 290}
-                </p>
-                <p className="text-gray-600 text-sm">Save 2 months!</p>
+              <div className="text-4xl font-bold text-white mb-2">
+                <span className="text-2xl">$</span>{Math.round(BASE_PRICES.yearly / 12)}
+                <span className="text-lg text-gray-400">/month</span>
               </div>
-              
-              <ul className="space-y-2 mb-6 text-sm text-gray-600">
-                <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                  Everything in Monthly
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                  2 months free
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                  Priority support
-                </li>
-              </ul>
-              
-              <StripeCheckout
-                plan="yearly"
-                onSuccess={handleCheckoutSuccess}
-                onError={handleCheckoutError}
-                className="w-full"
-                variant="success"
-                disabled={subscriptionStatus?.plan === 'yearly'}
-              >
-                {subscriptionStatus?.plan === 'yearly' ? 'Current Plan' : 'Subscribe Yearly'}
-              </StripeCheckout>
+              <div className="text-sm text-gray-400 mb-2">
+                Billed annually at ${BASE_PRICES.yearly}
+              </div>
+              <p className="text-gray-400">Best value for committed learners</p>
             </div>
 
-            {/* Pro Plan */}
-            <div className="border border-gray-200 rounded-lg p-6 hover:border-blue-300 transition-colors">
-              <div className="text-center mb-6">
-                <h3 className="font-semibold text-lg text-gray-900 mb-2">Pro</h3>
-                <p className="text-3xl font-bold text-gray-900 mb-2">
-                  ${BASE_PRICES?.pro || 49}
-                  <span className="text-base text-gray-500">/month</span>
-                </p>
-                <p className="text-gray-600 text-sm">Advanced features</p>
-              </div>
-              
-              <ul className="space-y-2 mb-6 text-sm text-gray-600">
-                <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                  Everything in Monthly
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                  Advanced modules
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                  Unlimited portfolios
-                </li>
-              </ul>
-              
-              <StripeCheckout
-                plan="pro"
-                onSuccess={handleCheckoutSuccess}
-                onError={handleCheckoutError}
-                className="w-full"
-                disabled={subscriptionStatus?.plan === 'pro'}
-              >
-                {subscriptionStatus?.plan === 'pro' ? 'Current Plan' : 'Subscribe Pro'}
-              </StripeCheckout>
+            <ul className="space-y-4 mb-8">
+              <li className="flex items-center text-gray-300">
+                <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                Everything in Monthly
+              </li>
+              <li className="flex items-center text-gray-300">
+                <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                2 months free
+              </li>
+              <li className="flex items-center text-gray-300">
+                <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                Priority support
+              </li>
+              <li className="flex items-center text-gray-300">
+                <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                Early access to features
+              </li>
+            </ul>
+
+            <StripeCheckout
+              plan="yearly"
+              onSuccess={handleCheckoutSuccess}
+              onError={handleCheckoutError}
+              className="w-full"
+              variant="success"
+              requireTerms={true}
+            >
+              Save with Annual
+            </StripeCheckout>
+          </div>
+
+          {/* Pro Plan */}
+          <div className="bg-gray-800 rounded-2xl p-8 border-2 border-blue-500 relative">
+            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+              <span className="bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-semibold">
+                Most Popular
+              </span>
             </div>
 
-            {/* Enterprise Plan */}
-            <div className="border border-gray-200 rounded-lg p-6 hover:border-blue-300 transition-colors">
-              <div className="text-center mb-6">
-                <h3 className="font-semibold text-lg text-gray-900 mb-2">Enterprise</h3>
-                <p className="text-3xl font-bold text-gray-900 mb-2">
-                  ${BASE_PRICES?.enterprise || 199}
-                  <span className="text-base text-gray-500">/month</span>
-                </p>
-                <p className="text-gray-600 text-sm">For institutions</p>
+            <div className="text-center mb-8">
+              <h3 className="text-2xl font-bold text-white mb-2">Pro</h3>
+              <div className="text-4xl font-bold text-white mb-2">
+                <span className="text-2xl">$</span>{BASE_PRICES.pro}
+                <span className="text-lg text-gray-400">/month</span>
               </div>
-              
-              <ul className="space-y-2 mb-6 text-sm text-gray-600">
-                <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                  Everything in Pro
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                  Custom learning paths
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                  Dedicated support
-                </li>
-              </ul>
-              
-              <StripeCheckout
-                plan="enterprise"
-                onSuccess={handleCheckoutSuccess}
-                onError={handleCheckoutError}
-                className="w-full"
-                disabled={subscriptionStatus?.plan === 'enterprise'}
-              >
-                {subscriptionStatus?.plan === 'enterprise' ? 'Current Plan' : 'Subscribe Enterprise'}
-              </StripeCheckout>
+              <p className="text-gray-400">For serious traders</p>
             </div>
+
+            <ul className="space-y-4 mb-8">
+              <li className="flex items-center text-gray-300">
+                <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                Everything in Monthly
+              </li>
+              <li className="flex items-center text-gray-300">
+                <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                Advanced learning modules
+              </li>
+              <li className="flex items-center text-gray-300">
+                <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                Unlimited practice portfolios
+              </li>
+              <li className="flex items-center text-gray-300">
+                <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                Strategy learning tools
+              </li>
+              <li className="flex items-center text-gray-300">
+                <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                Priority support
+              </li>
+            </ul>
+
+            <StripeCheckout
+              plan="pro"
+              onSuccess={handleCheckoutSuccess}
+              onError={handleCheckoutError}
+              className="w-full"
+              variant="primary"
+              requireTerms={true}
+            >
+              Upgrade to Pro
+            </StripeCheckout>
+          </div>
+
+          {/* Enterprise Plan */}
+          <div className="bg-gray-800 rounded-2xl p-8 border border-gray-700">
+            <div className="text-center mb-8">
+              <h3 className="text-2xl font-bold text-white mb-2">Enterprise</h3>
+              <div className="text-4xl font-bold text-white mb-2">
+                <span className="text-2xl">$</span>{BASE_PRICES.enterprise}
+                <span className="text-lg text-gray-400">/month</span>
+              </div>
+              <p className="text-gray-400">For institutions</p>
+            </div>
+
+            <ul className="space-y-4 mb-8">
+              <li className="flex items-center text-gray-300">
+                <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                Everything in Pro
+              </li>
+              <li className="flex items-center text-gray-300">
+                <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                Custom learning paths
+              </li>
+              <li className="flex items-center text-gray-300">
+                <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                Dedicated instructor support
+              </li>
+              <li className="flex items-center text-gray-300">
+                <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                White-label options
+              </li>
+            </ul>
+
+            <StripeCheckout
+              plan="enterprise"
+              onSuccess={handleCheckoutSuccess}
+              onError={handleCheckoutError}
+              className="w-full"
+              variant="secondary"
+              requireTerms={true}
+            >
+              Contact Sales
+            </StripeCheckout>
           </div>
         </div>
 
-        {/* Support */}
-        <div className="text-center mt-8">
-          <p className="text-gray-600">
-            Need help? Contact us at{' '}
-            <a href="mailto:support@learnoptionstrading.academy" className="text-blue-600 hover:underline">
-              support@learnoptionstrading.academy
-            </a>
-          </p>
+        {/* Features Comparison */}
+        <div className="bg-gray-800 rounded-2xl p-8 mb-16">
+          <h2 className="text-3xl font-bold text-white text-center mb-8">
+            Compare Plans
+          </h2>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-gray-700">
+                  <th className="text-white font-semibold py-4 px-4">Features</th>
+                  <th className="text-white font-semibold py-4 px-4 text-center">Monthly</th>
+                  <th className="text-white font-semibold py-4 px-4 text-center">Annual</th>
+                  <th className="text-white font-semibold py-4 px-4 text-center">Pro</th>
+                  <th className="text-white font-semibold py-4 px-4 text-center">Enterprise</th>
+                </tr>
+              </thead>
+              <tbody className="text-gray-300">
+                <tr className="border-b border-gray-700">
+                  <td className="py-4 px-4">Educational Market Data</td>
+                  <td className="py-4 px-4 text-center">
+                    <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-700">
+                  <td className="py-4 px-4">Practice Portfolios</td>
+                  <td className="py-4 px-4 text-center text-gray-400">5</td>
+                  <td className="py-4 px-4 text-center text-gray-400">5</td>
+                  <td className="py-4 px-4 text-center text-gray-400">Unlimited</td>
+                  <td className="py-4 px-4 text-center text-gray-400">Unlimited</td>
+                </tr>
+                <tr className="border-b border-gray-700">
+                  <td className="py-4 px-4">Advanced Learning Modules</td>
+                  <td className="py-4 px-4 text-center text-gray-500">—</td>
+                  <td className="py-4 px-4 text-center text-gray-500">—</td>
+                  <td className="py-4 px-4 text-center">
+                    <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-700">
+                  <td className="py-4 px-4">Priority Support</td>
+                  <td className="py-4 px-4 text-center text-gray-500">—</td>
+                  <td className="py-4 px-4 text-center">
+                    <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="py-4 px-4">Custom Learning Paths</td>
+                  <td className="py-4 px-4 text-center text-gray-500">—</td>
+                  <td className="py-4 px-4 text-center text-gray-500">—</td>
+                  <td className="py-4 px-4 text-center text-gray-500">—</td>
+                  <td className="py-4 px-4 text-center">
+                    <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* FAQ Section */}
+        <div className="text-center">
+          <h2 className="text-3xl font-bold text-white mb-8">
+            Frequently Asked Questions
+          </h2>
+          
+          <div className="bg-gray-800 rounded-2xl p-8 text-left max-w-4xl mx-auto">
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-2">Can I change my plan later?</h3>
+                <p className="text-gray-300">
+                  Yes! You can upgrade or downgrade your plan at any time. Changes will be reflected in your next billing cycle.
+                </p>
+              </div>
+              
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-2">Is there a free trial?</h3>
+                <p className="text-gray-300">
+                  We offer a 7-day money-back guarantee. If you're not satisfied, we'll refund your payment in full.
+                </p>
+              </div>
+              
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-2">What payment methods do you accept?</h3>
+                <p className="text-gray-300">
+                  We accept all major credit cards, PayPal, and bank transfers through our secure Stripe payment processor.
+                </p>
+              </div>
+              
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-2">Can I cancel anytime?</h3>
+                <p className="text-gray-300">
+                  Yes, you can cancel your subscription at any time. Your account will remain active until the end of your billing period.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Terms and Conditions Modal */}
+      {showTermsModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 bg-black bg-opacity-75 transition-opacity" onClick={handleTermsDeclined} />
+            
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <TermsAgreement 
+                  onAccept={handleTermsAccepted}
+                  onDecline={handleTermsDeclined}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
+
+export default PricingPage

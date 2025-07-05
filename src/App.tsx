@@ -60,7 +60,7 @@ function App() {
                   <Routes>
                     {/* Public Routes */}
                     <Route path="/" element={<Landing />} />
-                    <Route path="/pricing" element={<PricingPage />} />
+                    <Route path="/pricing" element={<SubscriptionPage />} />
                     <Route path="/subscription" element={<SubscriptionPage />} />
                     <Route path="/success" element={<Success />} />
                     
