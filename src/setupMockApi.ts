@@ -4,86 +4,63 @@ import { runSubscriptionTests, runE2ETests } from './api/testRunner';
  * Sets up mock API endpoints for development mode
  */
 export function setupMockApi() {
-  // Create a mock fetch handler
+  // Store original fetch
   const originalFetch = window.fetch;
   
-  window.fetch = async function(input, init) {
-    const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+  // Mock API setup - NO STRIPE CHECKOUT INTERCEPTS
+  window.fetch = async (url: string | Request, init?: RequestInit): Promise<Response> => {
+    const urlString = typeof url === 'string' ? url : url.url;
     
-    console.log('🌐 Fetch intercepted:', { url, method: init?.method })
+    console.log('🌐 Fetch intercepted:', urlString)
     
-    // Mock API endpoints
-    if (url === '/api/run-subscription-tests' && init?.method === 'POST') {
+    // Test runner endpoints (keep these)
+    if (urlString === '/api/run-subscription-tests' && init?.method === 'POST') {
       try {
-        console.log('🧪 Running subscription tests...')
         const results = await runSubscriptionTests();
-        console.log('✅ Subscription tests completed:', results)
-        
-        const response = new Response(JSON.stringify(results), {
+        return new Response(JSON.stringify(results), {
           status: 200,
           headers: { 'Content-Type': 'application/json' }
         });
-        
-        return response;
       } catch (error) {
-        console.error('❌ Error running subscription tests:', error)
-        const errorResponse = new Response(JSON.stringify({ 
-          error: error instanceof Error ? error.message : 'Unknown error',
-          success: false 
-        }), {
+        return new Response(JSON.stringify({ error: 'Test execution failed' }), {
           status: 500,
           headers: { 'Content-Type': 'application/json' }
         });
-        
-        return errorResponse;
       }
     }
-    
-    if (url === '/api/run-e2e-tests' && init?.method === 'POST') {
+
+    if (urlString === '/api/run-e2e-tests' && init?.method === 'POST') {
       try {
-        console.log('🧪 Running E2E tests...')
         const results = await runE2ETests();
-        console.log('✅ E2E tests completed:', results)
-        
-        const response = new Response(JSON.stringify(results), {
+        return new Response(JSON.stringify(results), {
           status: 200,
           headers: { 'Content-Type': 'application/json' }
         });
-        
-        return response;
       } catch (error) {
-        console.error('❌ Error running E2E tests:', error)
-        const errorResponse = new Response(JSON.stringify({ 
-          error: error instanceof Error ? error.message : 'Unknown error',
-          success: false 
-        }), {
+        return new Response(JSON.stringify({ error: 'E2E test execution failed' }), {
           status: 500,
           headers: { 'Content-Type': 'application/json' }
         });
-        
-        return errorResponse;
       }
     }
-    
-    // Log all other requests that might be causing issues
-    if (url.includes('/api/')) {
-      console.log('🚨 Unmocked API call detected:', { url, method: init?.method })
+
+    // 🚨 BLOCK ALL OTHER API CALLS - No Stripe checkout sessions allowed
+    if (urlString.includes('/api/')) {
+      console.error('❌ Blocked API call to:', urlString)
+      console.error('❌ Use Payment Links instead of API calls!')
       
-      // Return a 404 for unmocked API calls to help debug
       return new Response(JSON.stringify({ 
-        error: 'API endpoint not implemented in development mode',
-        url: url,
-        method: init?.method || 'GET'
+        error: 'API calls disabled - Use Payment Links only',
+        redirectTo: '/pricing'
       }), {
-        status: 404,
+        status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
     }
-    
-    // Pass through to original fetch for all other requests
-    console.log('➡️ Passing through to original fetch for:', url)
-    return originalFetch(input, init);
-  };
-  
-  console.log('✅ Mock API endpoints set up for development mode');
+
+    // For all other requests, use original fetch
+    return originalFetch(url, init);
+  }
+
+  console.log('🔧 Mock API setup complete - Stripe API calls blocked');
 }

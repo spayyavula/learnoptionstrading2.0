@@ -48,25 +48,18 @@ export default function Landing() {
   }, [])
 
   const handleSubscribe = async (plan: 'monthly' | 'yearly' | 'pro' | 'enterprise') => {
-    // Show terms agreement before proceeding
+    // Just show terms - no direct checkout call
     setPendingSubscription({ plan })
     setShowTermsModal(true)
   }
 
-  const handleTermsAccepted = async () => {
-    if (!pendingSubscription) return
+  const handleTermsAccepted = () => {
+    // Just close the modal - let StripeCheckout component handle the rest
+    setShowTermsModal(false)
+    setPendingSubscription(null)
     
-    try {
-      const { plan } = pendingSubscription
-      await StripeService.redirectToCheckout(plan)
-    } catch (error) {
-      console.error('Failed to create checkout session:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
-      alert(`Checkout Error\n\n${errorMessage}\n\nPlease try again or contact support if the problem persists.`)
-    } finally {
-      setShowTermsModal(false)
-      setPendingSubscription(null)
-    }
+    // The actual checkout is handled by StripeCheckout component
+    console.log('✅ Terms accepted - checkout handled by StripeCheckout component')
   }
 
   const handleTermsDeclined = () => {

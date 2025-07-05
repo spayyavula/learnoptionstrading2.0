@@ -10,6 +10,7 @@ interface StripeCheckoutProps {
   className?: string
   disabled?: boolean
   variant?: 'primary' | 'secondary' | 'success' | 'outline'
+  requireTerms?: boolean
 }
 
 export default function StripeCheckout({ 
@@ -19,7 +20,8 @@ export default function StripeCheckout({
   children, 
   className = '',
   disabled = false,
-  variant = 'primary'
+  variant = 'primary',
+  requireTerms = false
 }: StripeCheckoutProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -34,22 +36,37 @@ export default function StripeCheckout({
   const handleCheckout = async () => {
     if (disabled || loading) return
 
-    console.log('🛒 StripeCheckout component - handleCheckout called')
+    console.log('🛒 StripeCheckout - handleCheckout called')
     console.log('📋 Plan:', plan)
-    console.log('🌍 Current URL:', window.location.href)
+    console.log('🔧 Require Terms:', requireTerms)
 
     setLoading(true)
     setError(null)
     
     try {
+      // Show terms if required
+      if (requireTerms) {
+        const termsAccepted = confirm(
+          `Terms & Conditions\n\n` +
+          `By proceeding, you agree to:\n` +
+          `• Our Terms of Service\n` +
+          `• Privacy Policy\n` +
+          `• Subscription terms\n\n` +
+          `Continue with ${plan} subscription?`
+        )
+        
+        if (!termsAccepted) {
+          setLoading(false)
+          return
+        }
+      }
+      
       console.log('🚀 Calling StripeService.redirectToCheckout...')
       
-      // Use StripeService - this should only use Payment Links, no API calls
+      // This should ONLY use Payment Links or Mock - NO API calls
       await StripeService.redirectToCheckout(plan)
       
       console.log('✅ StripeService.redirectToCheckout completed')
-      
-      // If we reach here (shouldn't happen with redirect), call success
       onSuccess?.()
       
     } catch (error) {
