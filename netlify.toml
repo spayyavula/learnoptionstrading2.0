@@ -1,12 +1,18 @@
 # Simple Netlify configuration for Learn Options Trading App
 [build]
-  command = "npm install && npm run build"
+  command = "npm run build"
   publish = "dist"
   functions = "netlify/functions"
 
+[dev]
+  command = "vite"
+  targetPort = 5173
+  port = 8888
+  functions = "netlify/functions"
+
 [build.environment]
-  NODE_VERSION = "22"
-  NPM_VERSION = "10"
+  NODE_VERSION = "18"
+  NPM_VERSION = "9"
 
 # SPA routing
 [[redirects]]
@@ -25,23 +31,23 @@
   for = "*.js"
   [headers.values]
     Cache-Control = "no-cache, no-store, must-revalidate"
-    Pragma = "no-cache"
     Expires = "0"
+    Pragma = "no-cache"
 
 # Force HTML refresh
 [[headers]]
   for = "*.html"
   [headers.values]
     Cache-Control = "no-cache, no-store, must-revalidate"
-    Pragma = "no-cache"
     Expires = "0"
+    Pragma = "no-cache"
 
 # Basic security headers
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
 
 # Functions configuration
