@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { 
   ArrowRight, 
   TrendingUp, 
@@ -15,88 +15,9 @@ import {
   Star,
 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ConstantContactService } from '../services/constantContactService'
-import { StripeService } from '../services/stripeService'
-import { BASE_PRICES, YEARLY_SAVINGS_PERCENT } from '../utils/priceSync'
-import TermsAgreement from '../components/TermsAgreement'
-import StripeCheckout from '../components/StripeCheckout'
-
-console.log('🔍 Landing.tsx - BASE_PRICES Debug:', BASE_PRICES)
-console.log('🔍 Landing.tsx - Yearly calculation:', Math.round(BASE_PRICES.yearly / 12))
-console.log('🔍 Landing.tsx - YEARLY_SAVINGS_PERCENT:', YEARLY_SAVINGS_PERCENT)
 
 export default function Landing() {
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
-  const [isSubscribed, setIsSubscribed] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [emailMessage, setEmailMessage] = useState('')
-  const [subscriptionSuccess, setSubscriptionSuccess] = useState(false)
-  const [showTermsModal, setShowTermsModal] = useState(false)
-  const [pendingSubscription, setPendingSubscription] = useState<{plan: 'monthly' | 'yearly' | 'pro' | 'enterprise'} | null>(null)
-  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('yearly')
-
-  // Clean up useEffect - remove coupon initialization
-  React.useEffect(() => {
-    // Check for subscription success in URL
-    const urlParams = new URLSearchParams(window.location.search)
-    if (urlParams.get('subscription') === 'success') {
-      setSubscriptionSuccess(true)
-      // Remove the query parameters from the URL
-      window.history.replaceState({}, document.title, window.location.pathname)
-    }
-  }, [])
-
-  const handleSubscribe = async (plan: 'monthly' | 'yearly' | 'pro' | 'enterprise') => {
-    // Just show terms - no direct checkout call
-    setPendingSubscription({ plan })
-    setShowTermsModal(true)
-  }
-
-  const handleTermsAccepted = () => {
-    // Just close the modal - let StripeCheckout component handle the rest
-    setShowTermsModal(false)
-    setPendingSubscription(null)
-    
-    // The actual checkout is handled by StripeCheckout component
-    console.log('✅ Terms accepted - checkout handled by StripeCheckout component')
-  }
-
-  const handleTermsDeclined = () => {
-    setShowTermsModal(false)
-    setPendingSubscription(null)
-  }
-
-  const handleEmailSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setEmailMessage('')
-    
-    try {
-      const result = await ConstantContactService.subscribeEmail(email)
-      setIsSubscribed(result.success)
-      setEmailMessage(result.message)
-    } catch (error) {
-      console.error('Failed to subscribe:', error)
-      setEmailMessage('Failed to subscribe. Please try again later.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleTermsButtonClick = () => {
-    setShowTermsModal(true)
-  }
-
-  const handleCheckoutSuccess = () => {
-    console.log('✅ Checkout completed successfully from Landing page')
-  }
-
-  const handleCheckoutError = (error: string) => {
-    console.error('❌ Checkout error from Landing page:', error)
-    // Show user-friendly error message
-    alert(`Checkout Error: ${error}\n\nPlease try again or contact support.`)
-  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -218,146 +139,22 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Pricing Section */}
+      {/* Simple CTA Section instead of Pricing */}
       <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Simple, Transparent Pricing
-            </h2>
-            <p className="text-xl text-gray-600">
-              Choose the plan that fits your learning goals
-            </p>
-          </div>
-          
-          {/* Plan Toggle */}
-          <div className="flex justify-center mb-8">
-            <div className="bg-gray-100 p-1 rounded-lg">
-              <button
-                onClick={() => setSelectedPlan('monthly')}
-                className={`px-6 py-2 rounded-md font-medium transition-colors ${
-                  selectedPlan === 'monthly'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Monthly
-              </button>
-              <button
-                onClick={() => setSelectedPlan('yearly')}
-                className={`px-6 py-2 rounded-md font-medium transition-colors ${
-                  selectedPlan === 'yearly'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Yearly
-                <span className="ml-2 bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
-                  Save {YEARLY_SAVINGS_PERCENT}%
-                </span>
-              </button>
-            </div>
-          </div>
-
-          {/* Pricing Cards */}
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* Monthly Plan */}
-            <div className={`bg-white rounded-2xl shadow-lg p-8 border-2 ${
-              selectedPlan === 'monthly' ? 'border-blue-500' : 'border-gray-200'
-            }`}>
-              <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Monthly Plan</h3>
-                <div className="text-4xl font-bold text-gray-900 mb-4">
-                  ${BASE_PRICES?.monthly || 29}
-                  <span className="text-lg text-gray-500">/month</span>
-                </div>
-                <p className="text-gray-600">Perfect for getting started</p>
-              </div>
-
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  <span>Educational market data</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  <span>Basic learning modules</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  <span>5 practice portfolios</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  <span>Email support</span>
-                </li>
-              </ul>
-
-              <StripeCheckout
-                plan="monthly"
-                onSuccess={handleCheckoutSuccess}
-                onError={handleCheckoutError}
-                className="w-full"
-                disabled={selectedPlan !== 'monthly'}
-              >
-                Get Started Monthly
-              </StripeCheckout>
-            </div>
-
-            {/* Yearly Plan */}
-            <div className={`bg-white rounded-2xl shadow-lg p-8 border-2 relative ${
-              selectedPlan === 'yearly' ? 'border-green-500' : 'border-gray-200'
-            }`}>
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <span className="bg-green-500 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center">
-                  <Star className="h-4 w-4 mr-1" />
-                  Best Value
-                </span>
-              </div>
-
-              <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Yearly Plan</h3>
-                <div className="text-4xl font-bold text-gray-900 mb-2">
-                  ${Math.round((BASE_PRICES?.yearly || 290) / 12)}
-                  <span className="text-lg text-gray-500">/month</span>
-                </div>
-                <div className="text-sm text-gray-600 mb-4">
-                  Billed annually at ${BASE_PRICES?.yearly || 290}
-                </div>
-                <p className="text-gray-600">Best value for committed learners</p>
-              </div>
-
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  <span>Everything in Monthly</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  <span>2 months free</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  <span>Priority support</span>
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                  <span>Early access to new features</span>
-                </li>
-              </ul>
-
-              <StripeCheckout
-                plan="yearly"
-                onSuccess={handleCheckoutSuccess}
-                onError={handleCheckoutError}
-                className="w-full"
-                variant="success"
-                disabled={selectedPlan !== 'yearly'}
-              >
-                Save with Yearly Plan
-              </StripeCheckout>
-            </div>
-          </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Start Learning Today
+          </h2>
+          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            Join our educational platform and master options trading safely
+          </p>
+          <Link
+            to="/app"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors inline-flex items-center"
+          >
+            Get Started Free
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Link>
         </div>
       </section>
 
@@ -482,24 +279,6 @@ export default function Landing() {
           </div>
         </div>
       </footer>
-
-      {/* Terms and Conditions Modal */}
-      {showTermsModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 bg-black bg-opacity-75 transition-opacity" onClick={handleTermsDeclined} />
-            
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <TermsAgreement 
-                  onAccept={handleTermsAccepted}
-                  onDecline={handleTermsDeclined}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
