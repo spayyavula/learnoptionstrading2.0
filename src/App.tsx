@@ -9,7 +9,6 @@ import AdminRoute from './components/AdminRoute'
 import { OptionsProvider } from './context/OptionsContext'
 import { TradingProvider } from './context/TradingContext'
 import { OptionsDataProvider } from './context/OptionsDataContext'
-import PricingPage from './pages/PricingPage'
 import SubscriptionPage from './pages/SubscriptionPage'
 import Success from './pages/Success'
 import AppLayout from './components/AppLayout'
@@ -60,7 +59,6 @@ function App() {
                   <Routes>
                     {/* Public Routes */}
                     <Route path="/" element={<Landing />} />
-                    <Route path="/pricing" element={<SubscriptionPage />} />
                     <Route path="/subscription" element={<SubscriptionPage />} />
                     <Route path="/success" element={<Success />} />
                     
