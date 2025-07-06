@@ -35,7 +35,7 @@
 
 # Production context
 [context.production]
-  command = "npm ci && npm run build"
+  command = "npm install && npm run build"
   environment = { NODE_ENV = "production" }
 
 # Deploy previews
