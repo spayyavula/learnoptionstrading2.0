@@ -2,6 +2,7 @@
 [build]
   command = "npm install && npm run build"
   publish = "dist"
+  functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "22"
@@ -13,6 +14,28 @@
   to = "/index.html"
   status = 200
 
+# API redirects to functions
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# AGGRESSIVE cache busting for JS files
+[[headers]]
+  for = "*.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Pragma = "no-cache"
+    Expires = "0"
+
+# Force HTML refresh
+[[headers]]
+  for = "*.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Pragma = "no-cache"
+    Expires = "0"
+
 # Basic security headers
 [[headers]]
   for = "/*"
@@ -20,6 +43,11 @@
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
     X-XSS-Protection = "1; mode=block"
+
+# Functions configuration
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
 
 # Production context
 [context.production]

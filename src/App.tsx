@@ -13,6 +13,7 @@ import PricingPage from './pages/PricingPage'
 import SubscriptionPage from './pages/SubscriptionPage'
 import Success from './pages/Success'
 import AppLayout from './components/AppLayout'
+import SubscriptionSuccess from './pages/SubscriptionSuccess'
 
 // Lazy load page components
 const Dashboard = lazy(() => import('./pages/Dashboard'))
@@ -63,6 +64,7 @@ function App() {
                     <Route path="/pricing" element={<SubscriptionPage />} />
                     <Route path="/subscription" element={<SubscriptionPage />} />
                     <Route path="/success" element={<Success />} />
+                    <Route path="/subscription/success" element={<SubscriptionSuccess />} />
                     
                     {/* App Routes with nested routing */}
                     <Route path="/app" element={<AppLayout />}>
