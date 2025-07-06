@@ -48,12 +48,12 @@ function App() {
   return (
     <TradingProvider>
       <ErrorBoundary>
-        <SeoHelmet />
         <Disclaimer variant="banner" />
         {import.meta.env.DEV && <ErrorDisplay />}
         <OptionsProvider>
           <OptionsDataProvider>
             <Router>
+              <SeoHelmet />
               <div className="App">
                 <Suspense fallback={<LoadingFallback />}>
                   <Routes>
