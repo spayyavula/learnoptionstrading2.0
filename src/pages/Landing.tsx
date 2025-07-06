@@ -148,10 +148,10 @@ export default function Landing() {
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
               <Link
-                to="/pricing"
+                to="/app"
                 className="border-2 border-white text-white hover:bg-white hover:text-gray-900 px-8 py-4 rounded-lg text-lg font-semibold transition-colors"
               >
-                View Pricing
+                Get Started
               </Link>
             </div>
           </div>
@@ -439,10 +439,10 @@ export default function Landing() {
               Start Free Trial
             </Link>
             <Link
-              to="/pricing"
+              to="/app"
               className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold transition-colors"
             >
-              View All Plans
+              Start Learning
             </Link>
           </div>
         </div>
