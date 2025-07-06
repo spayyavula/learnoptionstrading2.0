@@ -111,12 +111,6 @@ export default function Landing() {
             </div>
             <div className="flex items-center space-x-4">
               <Link
-                to="/pricing"
-                className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Pricing
-              </Link>
-              <Link
                 to="/app"
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
               >
@@ -462,8 +456,8 @@ export default function Landing() {
               <h4 className="font-semibold mb-4">Platform</h4>
               <ul className="space-y-2 text-gray-400">
                 <li><Link to="/app" className="hover:text-white">Trading Simulator</Link></li>
-                <li><Link to="/pricing" className="hover:text-white">Pricing</Link></li>
                 <li><Link to="/app/lessons" className="hover:text-white">Lessons</Link></li>
+                <li><Link to="/app/dashboard" className="hover:text-white">Dashboard</Link></li>
               </ul>
             </div>
             <div>
