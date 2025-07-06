@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { 
   ArrowRight, 
   TrendingUp, 
@@ -16,10 +16,31 @@ import {
   AlertTriangle
 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
-import { trackPricingInterest } from '../utils/demandTracking'
+
+// Remove this import:
+// import { trackPricingInterest } from '../utils/demandTracking'
+
+// Add real Stripe service:
+import { createCheckoutSession } from '../services/stripeCheckout'
 
 export default function Landing() {
   const navigate = useNavigate()
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleProCheckout = async () => {
+    setIsLoading(true)
+    try {
+      await createCheckoutSession(
+        'price_1Rdu2JG0usgeCZqlpwN7k1Vr', // Your actual Stripe Price ID
+        'pro'
+      )
+    } catch (error) {
+      console.error('Checkout failed:', error)
+      alert('Sorry, there was an error processing your request. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -241,7 +262,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Pricing Section - Demand Testing */}
+      {/* Pricing Section - Updated with Real Stripe */}
       <section id="pricing" className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -254,7 +275,7 @@ export default function Landing() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {/* Free Plan */}
+            {/* Free Plan - No changes */}
             <div className="bg-white rounded-lg shadow-lg border-2 border-gray-200 p-8">
               <div className="text-center">
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Free</h3>
@@ -287,7 +308,7 @@ export default function Landing() {
               </Link>
             </div>
 
-            {/* Pro Plan - Most Popular */}
+            {/* Pro Plan - Updated with Real Stripe */}
             <div className="bg-white rounded-lg shadow-lg border-2 border-blue-500 p-8 relative">
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                 <span className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-semibold">
@@ -326,17 +347,22 @@ export default function Landing() {
                 </li>
               </ul>
               <button
-                onClick={() => {
-                  trackPricingInterest('pro')
-                  alert('Thanks for your interest! We\'ll notify you when Pro launches.')
-                }}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                onClick={handleProCheckout}
+                disabled={isLoading}
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center"
               >
-                Join Waitlist
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                    Processing...
+                  </>
+                ) : (
+                  'Subscribe Now'
+                )}
               </button>
             </div>
 
-            {/* Enterprise Plan */}
+            {/* Enterprise Plan - Updated */}
             <div className="bg-white rounded-lg shadow-lg border-2 border-gray-200 p-8">
               <div className="text-center">
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Enterprise</h3>
@@ -371,9 +397,7 @@ export default function Landing() {
               </ul>
               <button
                 onClick={() => {
-                  // Track enterprise interest
-                  console.log('🎯 Enterprise plan interest logged')
-                  window.open('mailto:contact@learnoptionstrading.academy?subject=Enterprise%20Plan%20Interest', '_blank')
+                  window.open('mailto:contact@learnoptionstrading.academy?subject=Enterprise%20Plan%20Interest&body=Hi, I\'m interested in learning more about your Enterprise plan. Please contact me with more details.', '_blank')
                 }}
                 className="w-full bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
               >
@@ -382,7 +406,7 @@ export default function Landing() {
             </div>
           </div>
 
-          {/* FAQ Section */}
+          {/* FAQ Section - No changes */}
           <div className="mt-20">
             <h3 className="text-2xl font-bold text-center text-gray-900 mb-8">
               Frequently Asked Questions
@@ -409,7 +433,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Footer */}
+      {/* Footer - No changes needed */}
       <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
