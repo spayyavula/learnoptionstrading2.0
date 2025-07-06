@@ -6,6 +6,8 @@
 [build.environment]
   NODE_VERSION = "22"
   NPM_VERSION = "10"
+  # Ensure clean install
+  NPM_CONFIG_CACHE = "/opt/buildhome/.npm"
 
 # SPA routing
 [[redirects]]
@@ -20,18 +22,6 @@
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
     X-XSS-Protection = "1; mode=block"
-
-# Don't cache HTML files
-[[headers]]
-  for = "*.html"
-  [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
-
-# Cache static assets
-[[headers]]
-  for = "/assets/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
 
 # Production context
 [context.production]
