@@ -15,6 +15,7 @@ import {
   Star,
 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
+import { trackPricingInterest } from '../utils/demandTracking'
 
 export default function Landing() {
   const navigate = useNavigate()
@@ -235,6 +236,174 @@ export default function Landing() {
             >
               Start Learning
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section - Demand Testing */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Simple, Transparent Pricing
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Start free, upgrade when you're ready. No hidden fees, no long-term contracts.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {/* Free Plan */}
+            <div className="bg-white rounded-lg shadow-lg border-2 border-gray-200 p-8">
+              <div className="text-center">
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Free</h3>
+                <div className="text-4xl font-bold text-gray-900 mb-4">$0<span className="text-lg text-gray-500">/month</span></div>
+                <p className="text-gray-600 mb-6">Perfect for beginners</p>
+              </div>
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                  <span>Basic options simulator</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                  <span>10 lessons & tutorials</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                  <span>Paper trading portfolio</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                  <span>Basic market data</span>
+                </li>
+              </ul>
+              <Link
+                to="/app"
+                className="w-full bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors text-center block"
+              >
+                Start Free
+              </Link>
+            </div>
+
+            {/* Pro Plan - Most Popular */}
+            <div className="bg-white rounded-lg shadow-lg border-2 border-blue-500 p-8 relative">
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                <span className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                  Most Popular
+                </span>
+              </div>
+              <div className="text-center">
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Pro</h3>
+                <div className="text-4xl font-bold text-gray-900 mb-4">$29<span className="text-lg text-gray-500">/month</span></div>
+                <p className="text-gray-600 mb-6">For serious learners</p>
+              </div>
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                  <span>Everything in Free</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                  <span>Advanced strategies & analysis</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                  <span>Real-time market data</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                  <span>Portfolio analytics</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                  <span>Options scanner & alerts</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                  <span>Community access</span>
+                </li>
+              </ul>
+              <button
+                onClick={() => {
+                  trackPricingInterest('pro')
+                  alert('Thanks for your interest! We\'ll notify you when Pro launches.')
+                }}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+              >
+                Join Waitlist
+              </button>
+            </div>
+
+            {/* Enterprise Plan */}
+            <div className="bg-white rounded-lg shadow-lg border-2 border-gray-200 p-8">
+              <div className="text-center">
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Enterprise</h3>
+                <div className="text-4xl font-bold text-gray-900 mb-4">$99<span className="text-lg text-gray-500">/month</span></div>
+                <p className="text-gray-600 mb-6">For institutions</p>
+              </div>
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                  <span>Everything in Pro</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                  <span>Advanced risk management</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                  <span>Custom strategies</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                  <span>White-label platform</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                  <span>Priority support</span>
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                  <span>API access</span>
+                </li>
+              </ul>
+              <button
+                onClick={() => {
+                  // Track enterprise interest
+                  console.log('🎯 Enterprise plan interest logged')
+                  window.open('mailto:contact@learnoptionstrading.academy?subject=Enterprise%20Plan%20Interest', '_blank')
+                }}
+                className="w-full bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+              >
+                Contact Sales
+              </button>
+            </div>
+          </div>
+
+          {/* FAQ Section */}
+          <div className="mt-20">
+            <h3 className="text-2xl font-bold text-center text-gray-900 mb-8">
+              Frequently Asked Questions
+            </h3>
+            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-2">Is the free plan really free?</h4>
+                <p className="text-gray-600">Yes! No credit card required. Start learning immediately with our comprehensive free tier.</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-2">Can I cancel anytime?</h4>
+                <p className="text-gray-600">Absolutely. No long-term contracts. Cancel or change plans anytime from your dashboard.</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-2">What payment methods do you accept?</h4>
+                <p className="text-gray-600">We accept all major credit cards and PayPal for your convenience.</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-2">Do you offer student discounts?</h4>
+                <p className="text-gray-600">Yes! Contact us with your .edu email for a 50% student discount on Pro plans.</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
