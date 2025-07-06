@@ -13,6 +13,7 @@ import {
   Target,
   Mail,
   Star,
+  AlertTriangle
 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { trackPricingInterest } from '../utils/demandTracking'
@@ -241,7 +242,7 @@ export default function Landing() {
       </section>
 
       {/* Pricing Section - Demand Testing */}
-      <section className="py-20 bg-gray-50">
+      <section id="pricing" className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -445,6 +446,25 @@ export default function Landing() {
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
             <p>&copy; 2024 Learn Options Trading Academy. All rights reserved.</p>
+          </div>
+          {/* Add disclaimer at bottom of footer */}
+          <div className="mt-8 pt-8 border-t border-gray-800">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+              <div className="flex items-center text-sm text-gray-400">
+                <AlertTriangle className="h-4 w-4 mr-2 text-yellow-400" />
+                <span>
+                  Educational platform using simulated trading. Options trading involves substantial risk.
+                  <Link to="/disclaimer" className="ml-2 underline hover:text-white">
+                    View full disclaimer
+                  </Link>
+                </span>
+              </div>
+              <div className="mt-4 md:mt-0">
+                <p className="text-sm text-gray-400">
+                  © 2024 Learn Options Trading. All rights reserved.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </footer>

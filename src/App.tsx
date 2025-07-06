@@ -1,5 +1,5 @@
 import React, { lazy, Suspense } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import SeoHelmet from './components/SeoHelmet'
 import ErrorBoundary from './components/ErrorBoundary'
 import Disclaimer from './components/Disclaimer'
@@ -36,7 +36,7 @@ const UserProfile = lazy(() => import('./pages/UserProfile'))
 
 // Loading component for Suspense
 const LoadingFallback = () => (
-  <div className="flex items-center justify-center h-screen">
+  <div className="min-h-screen bg-gray-50 flex items-center justify-center">
     <div className="text-center">
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
       <p className="text-gray-600">Loading...</p>
@@ -48,61 +48,78 @@ function App() {
   return (
     <TradingProvider>
       <ErrorBoundary>
-        <Disclaimer variant="banner" />
-        {import.meta.env.DEV && <ErrorDisplay />}
         <OptionsProvider>
           <OptionsDataProvider>
             <Router>
               <SeoHelmet />
-              <div className="App">
-                <Suspense fallback={<LoadingFallback />}>
-                  <Routes>
-                    {/* Public Routes */}
-                    <Route path="/" element={<Landing />} />
-                    <Route path="/subscription" element={<SubscriptionPage />} />
-                    <Route path="/success" element={<Success />} />
-                    
-                    {/* App Routes with nested routing */}
-                    <Route path="/app" element={<AppLayout />}>
-                      <Route index element={<Dashboard />} />
-                      <Route path="dashboard" element={<Dashboard />} />
-                      <Route path="agent" element={<AgentDashboard />} />
-                      <Route path="demo" element={<Demo />} />
-                      <Route path="portfolio" element={<OptionsPortfolio />} />
-                      <Route path="trading" element={<OptionsTrading />} />
-                      <Route path="orders" element={<Orders />} />
-                      <Route path="chain" element={<OptionsChain />} />
-                      <Route path="regime" element={<RegimeAnalysis />} />
-                      <Route path="analytics" element={<Analytics />} />
-                      <Route path="arbitrage" element={<OptionsArbitrage />} />
-                      <Route path="learning" element={<OptionsLearning />} />
-                      <Route path="journal" element={<TradingJournal />} />
-                      <Route path="strategies" element={<OptionsStrategies />} />
-                      <Route path="community" element={<Community />} />
-                      <Route path="settings" element={<Settings />} />
-                      <Route path="data" element={<OptionsDataManager />} />
-                      <Route path="construction" element={<Construction />} />
-                      <Route path="subscription" element={<SubscriptionPage />} />
-                      <Route path="profile" element={<UserProfile />} />
-                      
-                      {/* Admin Routes */}
-                      <Route path="admin" element={
-                        <AdminRoute>
-                          <AdminDashboard />
-                        </AdminRoute>
-                      } />
-                    </Route>
-                    
-                    {/* Catch-all redirect */}
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                  </Routes>
-                </Suspense>
-              </div>
+              <AppContent />
             </Router>
           </OptionsDataProvider>
         </OptionsProvider>
       </ErrorBoundary>
     </TradingProvider>
+  )
+}
+
+// Separate component to use useLocation hook
+function AppContent() {
+  const location = useLocation()
+  const isLandingPage = location.pathname === '/'
+
+  return (
+    <div className="App min-h-screen flex flex-col">
+      {/* Show disclaimer only on app pages, not landing */}
+      {!isLandingPage && <Disclaimer variant="banner" />}
+      
+      {/* Dev error display */}
+      {import.meta.env.DEV && <ErrorDisplay />}
+      
+      {/* Main content area */}
+      <div className="flex-1">
+        <Suspense fallback={<LoadingFallback />}>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<Landing />} />
+            <Route path="/subscription" element={<SubscriptionPage />} />
+            <Route path="/success" element={<Success />} />
+            
+            {/* App Routes with nested routing */}
+            <Route path="/app" element={<AppLayout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="agent" element={<AgentDashboard />} />
+              <Route path="demo" element={<Demo />} />
+              <Route path="portfolio" element={<OptionsPortfolio />} />
+              <Route path="trading" element={<OptionsTrading />} />
+              <Route path="orders" element={<Orders />} />
+              <Route path="chain" element={<OptionsChain />} />
+              <Route path="regime" element={<RegimeAnalysis />} />
+              <Route path="analytics" element={<Analytics />} />
+              <Route path="arbitrage" element={<OptionsArbitrage />} />
+              <Route path="learning" element={<OptionsLearning />} />
+              <Route path="journal" element={<TradingJournal />} />
+              <Route path="strategies" element={<OptionsStrategies />} />
+              <Route path="community" element={<Community />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="data" element={<OptionsDataManager />} />
+              <Route path="construction" element={<Construction />} />
+              <Route path="subscription" element={<SubscriptionPage />} />
+              <Route path="profile" element={<UserProfile />} />
+              
+              {/* Admin Routes */}
+              <Route path="admin" element={
+                <AdminRoute>
+                  <AdminDashboard />
+                </AdminRoute>
+              } />
+            </Route>
+            
+            {/* Catch-all redirect */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+      </div>
+    </div>
   )
 }
 
